@@ -6,7 +6,7 @@
  */
 
 //ALT: Original basic file uploading is get from http://sailsjs.org/#/documentation/concepts/File-Uploads
-
+//new commit test
 
 
 module.exports = {
