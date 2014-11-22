@@ -7,7 +7,7 @@
 
 //ALT: Original basic file uploading is get from http://sailsjs.org/#/documentation/concepts/File-Uploads
 //new commit test
-
+// add new
 
 module.exports = {
 		  index: function (req,res){
@@ -21,16 +21,16 @@ module.exports = {
 			    '</form>'
 			    )
 			  },
-			  
+
 			  prettyinput: function (req, res)
 			  {
-				  
-			  
+
+
 				  return res.view('prettyinput', {title:"HHHH-RRRRR-QQQQQ" });
-				  
-				  
+
+
 			  },
-			  
+
 			  upload: function  (req, res) {
 			    req.file('avatar').upload(function (err, files) {
 			      if (err)
@@ -42,6 +42,6 @@ module.exports = {
 			      });
 			    });
 			  }
-		
+
 };
 
