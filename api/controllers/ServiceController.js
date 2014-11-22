@@ -21,6 +21,16 @@ module.exports = {
 			    '</form>'
 			    )
 			  },
+			  
+			  prettyinput: function (req, res)
+			  {
+				  
+			  
+				  return res.view('prettyinput', {title:"HHHH-RRRRR-QQQQQ" });
+				  
+				  
+			  },
+			  
 			  upload: function  (req, res) {
 			    req.file('avatar').upload(function (err, files) {
 			      if (err)
