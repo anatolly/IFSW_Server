@@ -25,8 +25,11 @@ module.exports = {
 			  prettyinput: function (req, res)
 			  {
 				  
-			  
-				  return res.view('prettyinput', {title:"HHHH-RRRRR-QQQQQ" });
+			          res.title = "res-title";
+                                  sails.ISFWGlobals = {};
+			          sails.ISFWGlobals.title = "sails-ISFWGlobals-title";
+				  //return res.view('prettyinput', {title:"HHHH-RRRRR-QQQQQ" });
+				  return res.view('prettyinput');
 				  
 				  
 			  },
