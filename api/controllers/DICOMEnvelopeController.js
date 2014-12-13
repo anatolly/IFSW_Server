@@ -20,6 +20,10 @@ module.exports =
  // This code reads a DICOM P10 file from disk and creates a UInt8Array from it
       var fs = require('fs');
 
+
+
+
+
       var filePath =  files[0].fd; //   'ctimage.dcm';
       var dicomFileAsBuffer = fs.readFileSync(filePath);
       var dicomFileAsByteArray = new Uint8Array(dicomFileAsBuffer);
@@ -30,14 +34,19 @@ module.exports =
       //console.log('Patient Name = '+ patientName);
       DICOMFactory.createDICOMEnvelope(filePath, dataSet, function(aEnvelope) {
 
-        return res.json({
-          message: files.length + ' file(s) uploaded successfully!',
-          files: files,
-          envelope: JSON.stringify(aEnvelope)
-        });
+        //TODO implement generation of a proper filename (second parameter)
+        CloudAPI.uploadFile(filePath, filePath, function (err, file) {
 
+          if (err)  return res.json({Error: 'Error text:' + err });
+
+
+          return res.json({
+            message: file.length + ' file(s) uploaded successfully!',
+            files: file,
+            envelope: JSON.stringify(aEnvelope)
+          });
+        } )
       });
-
     });
   },
 
@@ -53,16 +62,14 @@ module.exports =
 
   download: function (req, res) {
     DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
+      res.contentType("application/octet-stream");
+      res.set("Content-Disposition","attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id +".dcm");
+      //res.set("Content-Length","132914");
+      //res.set("ETag","758367725");
+      //alternative to setup headers - res.setHeader('Content-disposition', 'attachment; filename=test.jpg')
 
-
-      var fs = require('fs');
-      var filePath =  envelopes[0].DICOMObjectID; //   'ctimage.dcm';
-      fs.readFile(filePath, function(err, data) {
-        res.contentType("application/octet-stream");
-        res.set("Content-Disposition","attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id +".dcm");
-        return res.send(data);
-        });
-      });
+      CloudAPI.downloadFile(envelopes[0].DICOMObjectID, res);
+    });
   }
 
 };

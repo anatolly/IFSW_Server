@@ -5,7 +5,7 @@
 
 //var dicomFactoryDictionary = require('./DICOMFactoryDictionary');
 
-
+var fs = require('fs');
 
 module.exports = {
 
@@ -22,5 +22,47 @@ module.exports = {
 
     return client;
 
+  },
+
+  uploadFile: function (filepath, filename, cb) {
+
+    // create a cloud client
+    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+
+    //save local file to the predefined container
+    // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
+
+    var readStream = fs.createReadStream(filepath);
+    var writeStream = client.upload({ container: 'my-container', remote: filename});
+
+    writeStream.on('error', function(err)
+    {
+      // handle your error case
+      cb(err, null);
+    });
+
+    writeStream.on('success', function(file)
+    {
+      // success, file will be a File model
+      cb(null, file);
+    });
+
+    readStream.pipe(writeStream);
+  },
+
+  downloadFile: function ( filename, res) {
+
+    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+
+
+    //download a remote file to the predefined container
+    // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
+
+    client.download({
+      container: 'my-container',
+      remote: filename
+    }).pipe(res);
   }
+
+
 };

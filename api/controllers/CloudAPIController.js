@@ -55,14 +55,14 @@ module.exports = {
     // create a cloud client
     var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
 
-    res.setHeader('Content-disposition', 'attachment; filename=test.jpg')
+    res.setHeader('Content-disposition', 'attachment; filename=test.dcm')
 
     //download a remote file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
     client.download({
       container: 'my-container',
-      remote: 'remote-file-name.txt'
+      remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/c32ec5c0-b111-475c-9450-bda863eaa4fa.dcm'
     }).pipe(res);
   },
 
