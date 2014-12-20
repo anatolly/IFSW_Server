@@ -38,11 +38,24 @@ module.exports = {
           return res.json({error_text: "ERROR" + err});
         };
 
-      //  var count =  containers[1].metadata.access ;
-     //    if (count == null) {count = 1; } else {count = count + 0.1}
-     // containers[1].metadata.access = count + "10.0" ;
-     //   client.updateContainerMetadata(containers[1], function (err, c){});
-        res.json({Containers: containers});
+        var descr =  "";
+      descr = containers[1].metadata.description;
+        if (descr != undefined) {
+          // current version doe snot support update. delete metadata frist
+        }
+      else
+        {
+          descr = 'Container for DICOM data';
+        }
+      containers[1].metadata.access = descr ;
+      client.updateContainerMetadata(containers[1], function (err_u, c){
+
+        if (err_u) {
+          console.log("ERROR="+err_u);
+          return res.json({error_text: "ERROR" + err_u});
+        }
+        res.json({Containers_AFTER: c})});
+
     });
 
   },

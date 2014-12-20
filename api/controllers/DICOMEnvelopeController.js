@@ -35,10 +35,12 @@ module.exports =
       DICOMFactory.createDICOMEnvelope(filePath, dataSet, function(aEnvelope) {
 
         //TODO implement generation of a proper filename (second parameter)
-        CloudAPI.uploadFile(filePath, filePath, function (err, file) {
+        CloudAPI.uploadFile(filePath, filePath, aEnvelope, function (err, file) {
 
           if (err)  return res.json({Error: 'Error text:' + err });
 
+          console.log("FILE UPLOADED:"+ JSON.stringify(file));
+          console.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
 
           return res.json({
             message: file.length + ' file(s) uploaded successfully!',

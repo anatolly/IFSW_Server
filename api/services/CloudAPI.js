@@ -7,8 +7,8 @@
 
 var fs = require('fs');
 
-//var   AWS = require('aws-sdk');
-//var proxy = require('proxy-agent');
+var   AWS = require('aws-sdk');
+var proxy = require('proxy-agent');
 
 module.exports = {
 
@@ -31,25 +31,29 @@ module.exports = {
     var containers = {};
     var options = {
       provider: 'amazon',
-      accessKeyId: 'H0RB6KZUKYKQCZ7IDTC4', // access key
-      accessKey: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY', // secret key
+      accessKeyId: 'H0RB6KZUKYKQCZ7IDTC4'//, // access key
+//      accessKey: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY' // secret key
       // as it was given in http://www.cloudvps.com/community/knowledge-base/pkgcloud-library-for-nodejs/
-      serversUrl: '192.168.17.145',
-      protocol: 'http',
-      region: 'us-west-2' // region
+      //serversUrl: '192.168.17.145',
+      //protocol: 'http',
+     // region: 'us-west-2' // region
        };
 
     // process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+
+    AWS.config.update({accessKeyId: 'H0RB6KZUKYKQCZ7IDTC4', secretAccessKey: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY'});
 
     var client = require('pkgcloud').storage.createClient(options);
 
 
 
-  //  AWS.config.update({
-  //    httpOptions: { agent: proxy('http://192.168.17.145:80') }
-  //  });
+    AWS.config.update({
+      httpOptions: { agent: proxy('http://192.168.17.145') }
+    });
 
-   // AWS.config.update({accessKeyId: 'akid', secretAccessKey: 'secret'});
+
+   // AWS.config.update({secretAccessKey: 'H0RB6KZUKYKQCZ7IDTC4', accessKeyId: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY'});
+
 
     return client;
 
@@ -59,7 +63,7 @@ module.exports = {
 
 
 
-  uploadFile: function (filepath, filename, cb) {
+  uploadFile: function (filepath, filename, metadata, cb) {
 
     // create a cloud client
     var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
@@ -79,7 +83,28 @@ module.exports = {
     writeStream.on('success', function(file)
     {
       // success, file will be a File model
-      cb(null, file);
+      // write metadata to the cloud
+     // file.metadata = {test : 'aaaa'}; //JSON.stringify(metadata);
+
+      file.metadata = {studyDescription: metadata.StudyDescription,
+                        patientID: metadata.PatientID,
+                        all_1: new Buffer(JSON.stringify(metadata)).toString('base64').substr(0,250),
+                        all_2: new Buffer(JSON.stringify(metadata)).toString('base64').substr(251,250),
+                        all_3: new Buffer(JSON.stringify(metadata)).toString('base64').substr(502,250),
+                        all_4: new Buffer(JSON.stringify(metadata)).toString('base64').substr(753,250),
+                        all_5: new Buffer(JSON.stringify(metadata)).toString('base64').substr(904,250)
+
+      };
+
+      console.log('updated file:'+JSON.stringify(file));
+      console.log('updated file metadata:'+JSON.stringify(file.metadata));
+
+
+      client.updateFileMetadata(file.container, file, cb );
+
+      //console.log(file);
+      //cb(null, file);
+
     });
 
     readStream.pipe(writeStream);
@@ -95,8 +120,19 @@ module.exports = {
 
     client.download({
       container: 'my-container',
-      remote: filename
-    }).pipe(res);
+      remote: filename },
+      function (err, file) {
+       if(err)
+       {
+         console.log('Error during download of the file from the cloud');
+       }
+        else
+       {
+         // check metadata
+         console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
+         console.log('the downloaded file:'+ JSON.stringify(file));
+       }
+      }).pipe(res);
   }
 
 
