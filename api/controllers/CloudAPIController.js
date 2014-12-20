@@ -11,7 +11,23 @@ module.exports = {
 
   },
 
+  testS3: function  (req, res) {
 
+    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+    client.getContainers(function (err, containers) {
+      if (err) {
+        console.log("ERROR="+err);
+        return res.json({error_text: "ERROR" + err});
+      };
+
+      //  var count =  containers[1].metadata.access ;
+      //    if (count == null) {count = 1; } else {count = count + 0.1}
+      // containers[1].metadata.access = count + "10.0" ;
+      //   client.updateContainerMetadata(containers[1], function (err, c){});
+      res.json({Containers: containers});
+    });
+
+  },
 
   test: function  (req, res) {
 
@@ -30,6 +46,26 @@ module.exports = {
     });
 
   },
+
+  createS3: function  (req, res) {
+
+    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+    client.getContainers(function (err, containers) {
+      if (err) {
+        console.log("ERROR="+err);
+        return res.json({error_text: "ERROR" + err});
+      };
+
+      client.createContainer({name:"my-container", metadata: {image:'DICOM', vol:234}}, function (err, container)
+      {
+
+        res.json({Container: container});
+      })
+    });
+
+
+  },
+
 
   create: function  (req, res) {
 
@@ -51,6 +87,24 @@ module.exports = {
   },
 
 
+  downloadS3: function (req, res) {
+    // create a cloud client
+    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+
+    res.setHeader('Content-disposition', 'attachment; filename=test.dcm')
+
+    //download a remote file to the predefined container
+    // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
+
+    client.download({
+      container: 'my-container',
+      remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/c32ec5c0-b111-475c-9450-bda863eaa4fa.dcm'
+    }).pipe(res);
+  },
+
+
+
+
   download: function (req, res) {
     // create a cloud client
     var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
@@ -65,6 +119,50 @@ module.exports = {
       remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/c32ec5c0-b111-475c-9450-bda863eaa4fa.dcm'
     }).pipe(res);
   },
+
+
+  pipeuploadS3_succeded: function  (req, res) {
+
+    // as in http://stackoverflow.com/questions/24069203/skipper-in-sailsjs-beta-image-resize-before-upload
+    var Writable = require('stream').Writable;
+
+
+    // create a cloud client
+    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+
+    //stream file to the predefined container
+    var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
+
+    // pipe the  data directly to the cloud provide
+    var readStream = req.file('dicom_file');
+
+    writeStream.on('error', function(err)
+    {
+      // handle your error case
+      return res.json({Error: 'Error text:' + err });
+    });
+
+    writeStream.on('success', function(file)
+    {
+      // success, file will be a File model
+      return res.json({SUCCESS: 'File details:' + file });
+    });
+
+    // Let's create a custom receiver
+    var receiver = new Writable({objectMode: true});
+    receiver._write = function(file, enc, cb) {
+      file.pipe(writeStream);
+
+      cb();
+    };
+
+    req.file('dicom_file').upload(receiver, function(err, files){
+      // File is now  uploaded to cloud storage
+    });
+
+  },
+
+
 
   pipeupload_succeded: function  (req, res) {
 

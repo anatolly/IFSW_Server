@@ -7,6 +7,9 @@
 
 var fs = require('fs');
 
+//var   AWS = require('aws-sdk');
+//var proxy = require('proxy-agent');
+
 module.exports = {
 
   initClient: function (a_username, a_passwd, a_service_url) {
@@ -23,6 +26,38 @@ module.exports = {
     return client;
 
   },
+
+  initS3Client: function (a_username, a_passwd, a_service_url) {
+    var containers = {};
+    var options = {
+      provider: 'amazon',
+      accessKeyId: 'H0RB6KZUKYKQCZ7IDTC4', // access key
+      accessKey: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY', // secret key
+      // as it was given in http://www.cloudvps.com/community/knowledge-base/pkgcloud-library-for-nodejs/
+      serversUrl: '192.168.17.145',
+      protocol: 'http',
+      region: 'us-west-2' // region
+       };
+
+    // process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+
+    var client = require('pkgcloud').storage.createClient(options);
+
+
+
+  //  AWS.config.update({
+  //    httpOptions: { agent: proxy('http://192.168.17.145:80') }
+  //  });
+
+   // AWS.config.update({accessKeyId: 'akid', secretAccessKey: 'secret'});
+
+    return client;
+
+  },
+
+
+
+
 
   uploadFile: function (filepath, filename, cb) {
 
