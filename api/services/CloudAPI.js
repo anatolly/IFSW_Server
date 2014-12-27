@@ -31,29 +31,20 @@ module.exports = {
     var containers = {};
     var options = {
       provider: 'amazon',
-      accessKeyId: 'H0RB6KZUKYKQCZ7IDTC4'//, // access key
-//      accessKey: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY' // secret key
-      // as it was given in http://www.cloudvps.com/community/knowledge-base/pkgcloud-library-for-nodejs/
-      //serversUrl: '192.168.17.145',
-      //protocol: 'http',
-     // region: 'us-west-2' // region
+      accessKeyId: a_username,// access key
+      accessKey: a_passwd // secret key
+      // region: 'us-west-4'
+      // we do not need a proxy-server as it was given in http://www.cloudvps.com/community/knowledge-base/pkgcloud-library-for-nodejs/
+      // PROXY SETTINGS -- serversUrl: '192.168.17.145',
+      // PROXY SETTINGS -- protocol: 'http',
+      // PROXY SETTINGS -- region: 'us-west-2' // region
        };
 
-    // process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-
-    AWS.config.update({accessKeyId: 'H0RB6KZUKYKQCZ7IDTC4', secretAccessKey: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY'});
+    // we do not modify HTTPS settings of node js yet -- process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
     var client = require('pkgcloud').storage.createClient(options);
-
-
-
-    AWS.config.update({
-      httpOptions: { agent: proxy('http://192.168.17.145') }
-    });
-
-
-   // AWS.config.update({secretAccessKey: 'H0RB6KZUKYKQCZ7IDTC4', accessKeyId: '0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY'});
-
+    // configure properly S3 endpoint to access the own S3-based service.
+    client.s3.endpoint = new AWS.Endpoint('http://192.168.17.145');
 
     return client;
 

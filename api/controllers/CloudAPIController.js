@@ -13,7 +13,9 @@ module.exports = {
 
   testS3: function  (req, res) {
 
-    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
+                                        "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
+                                        'http://192.168.17.145');
     client.getContainers(function (err, containers) {
       if (err) {
         console.log("ERROR="+err);
@@ -62,20 +64,35 @@ module.exports = {
 
   createS3: function  (req, res) {
 
-    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
+      "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
+      'http://192.168.17.145');
+
+
     client.getContainers(function (err, containers) {
       if (err) {
         console.log("ERROR="+err);
         return res.json({error_text: "ERROR" + err});
       };
 
-      client.createContainer({name:"my-container", metadata: {image:'DICOM', vol:234}}, function (err, container)
-      {
+    //  client.createContainer({name: "bucket", Key: 'key', Body: 'body'}, function (err, container)
+    //  {
+    //    if (err) {
+    //      console.log("ERROR="+err);
+    //      return res.json({error_text: "ERROR" + err});
+    //    }
+    //    return res.json({Container: container});
+    //  })
+    //});
 
-        res.json({Container: container});
-      })
-    });
-
+        client.s3.createBucket({Bucket: 'my-container' }, function (err, container) {
+          if (err) {
+             console.log("ERROR="+err);
+             return res.json({error_text: "ERROR" + err});
+           }
+           return res.json({Container: container});
+          })
+        });
 
   },
 
@@ -141,10 +158,12 @@ module.exports = {
 
 
     // create a cloud client
-    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
+      "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
+      'http://192.168.17.145');
 
     //stream file to the predefined container
-    var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
+    var writeStream = client.upload({ container: 'new-bucket-0cad10fa', remote: 'remote-file-name.txt'});
 
     // pipe the  data directly to the cloud provide
     var readStream = req.file('dicom_file');
