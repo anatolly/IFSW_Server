@@ -75,7 +75,7 @@ module.exports = {
         return res.json({error_text: "ERROR" + err});
       };
 
-    //  client.createContainer({name: "bucket", Key: 'key', Body: 'body'}, function (err, container)
+    //  client.createContainer({name: 'bucket---1', Key: 'key', Body: 'body'}, function (err, container){
     //  {
     //    if (err) {
     //      console.log("ERROR="+err);
@@ -85,7 +85,7 @@ module.exports = {
     //  })
     //});
 
-        client.s3.createBucket({Bucket: '//my-container' }, function (err, container) {
+        client.s3.createBucket({Bucket: 'my-container/' }, function (err, container) {
           if (err) {
              console.log("ERROR="+err);
              return res.json({error_text: "ERROR" + err});
@@ -163,7 +163,7 @@ module.exports = {
       'http://192.168.17.145');
 
     //stream file to the predefined container
-    var writeStream = client.upload({ container: '//new-bucket-0cad10fa', remote: 'remote-file-name.txt'});
+    var writeStream = client.upload({ container: 'my-container11111111/', remote: 'remote-file-name.txt'});
 
     // pipe the  data directly to the cloud provide
     var readStream = req.file('dicom_file');
@@ -330,5 +330,50 @@ module.exports = {
       readStream.pipe(writeStream);
 
       });
+  },
+
+
+  uploadS3: function  (req, res) {
+    req.file('dicom_file').upload(function (err, files) {
+      if (err)
+        return res.serverError(err);
+
+
+      var fs = require('fs');
+
+      var filePath =  files[0].fd; //   'ctimage.dcm';
+
+
+      // create a cloud client
+      var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
+        "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
+        'http://192.168.17.145');
+
+
+      //save local file to the predefined container
+      // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
+
+      var readStream = fs.createReadStream(filePath);
+      var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
+
+      writeStream.on('error', function(err)
+      {
+        // handle your error case
+        return res.json({Error: 'Error text:' + err });
+      });
+
+      writeStream.on('success', function(file)
+      {
+        // success, file will be a File model
+        return res.json({SUCCESS: 'File details:' + file });
+      });
+
+
+      readStream.pipe(writeStream);
+
+    });
   }
+
+
+
 };

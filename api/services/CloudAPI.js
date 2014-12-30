@@ -46,7 +46,7 @@ module.exports = {
 
     var client = require('pkgcloud').storage.createClient(options);
     // configure properly S3 endpoint to access the own S3-based service.
-    client.s3.endpoint = new AWS.Endpoint('http://192.168.17.145');
+    client.s3.endpoint = new AWS.Endpoint('http://ceph-objgw');
     AWS.config.update({s3ForcePathStyle: true});
 
 
