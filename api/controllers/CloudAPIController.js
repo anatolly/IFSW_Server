@@ -85,7 +85,7 @@ module.exports = {
     //  })
     //});
 
-        client.s3.createBucket({Bucket: 'my-container' }, function (err, container) {
+        client.s3.createBucket({Bucket: '//my-container' }, function (err, container) {
           if (err) {
              console.log("ERROR="+err);
              return res.json({error_text: "ERROR" + err});
@@ -163,7 +163,7 @@ module.exports = {
       'http://192.168.17.145');
 
     //stream file to the predefined container
-    var writeStream = client.upload({ container: 'new-bucket-0cad10fa', remote: 'remote-file-name.txt'});
+    var writeStream = client.upload({ container: '//new-bucket-0cad10fa', remote: 'remote-file-name.txt'});
 
     // pipe the  data directly to the cloud provide
     var readStream = req.file('dicom_file');

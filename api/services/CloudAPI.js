@@ -38,13 +38,17 @@ module.exports = {
       // PROXY SETTINGS -- serversUrl: '192.168.17.145',
       // PROXY SETTINGS -- protocol: 'http',
       // PROXY SETTINGS -- region: 'us-west-2' // region
+      , s3ForcePathStyle: true
        };
+    AWS.config.update({s3ForcePathStyle: true});
 
     // we do not modify HTTPS settings of node js yet -- process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
     var client = require('pkgcloud').storage.createClient(options);
     // configure properly S3 endpoint to access the own S3-based service.
     client.s3.endpoint = new AWS.Endpoint('http://192.168.17.145');
+    AWS.config.update({s3ForcePathStyle: true});
+
 
     return client;
 
