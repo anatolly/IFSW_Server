@@ -2,6 +2,7 @@
  * Created by ebabkin on 12/9/14.
  */
 
+var S3_HOST_ADDRESS = 'http://192.168.17.145';
 
 module.exports = {
 
@@ -15,7 +16,9 @@ module.exports = {
 
     var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
                                         "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-                                        'http://192.168.17.145');
+                                        S3_HOST_ADDRESS);
+
+
     client.getContainers(function (err, containers) {
       if (err) {
         console.log("ERROR="+err);
@@ -160,7 +163,7 @@ module.exports = {
     // create a cloud client
     var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
       "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-      'http://192.168.17.145');
+      S3_HOST_ADDRESS);
 
     //stream file to the predefined container
     var writeStream = client.upload({ container: 'my-container11111111/', remote: 'remote-file-name.txt'});
@@ -347,7 +350,7 @@ module.exports = {
       // create a cloud client
       var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
         "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-        'http://192.168.17.145');
+        S3_HOST_ADDRESS);
 
 
       //save local file to the predefined container
