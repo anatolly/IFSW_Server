@@ -45,7 +45,7 @@ module.exports =
           return res.json({
             message: file.length + ' file(s) uploaded successfully!',
             files: file,
-            envelope: JSON.stringify(aEnvelope)
+            envelope: aEnvelope
           });
         } )
       });

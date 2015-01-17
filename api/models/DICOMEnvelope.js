@@ -12,6 +12,18 @@ module.exports =
   attributes:
   {
 
+    toJSON: function() {
+
+      var object = this.toObject();
+      unk1 = JSON.parse(object.unknownDICOMDictionaryAttributes);
+      unk2 = JSON.parse(object.unknownIFSWAttributes);
+
+      object.unknownDICOMDictionaryAttributes = unk1;
+      object.unknownIFSWAttributes = unk2;
+      return object;
+
+    },
+
     unknownDICOMDictionaryAttributes: 'string', // a JSON -encoded hash of unknown attributes for DICOM Dictionary
     unknownIFSWAttributes: 'string', // a JSON -encoded hash of unknown attributes for IFSW system
 
