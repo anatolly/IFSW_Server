@@ -20,7 +20,7 @@ var World = function World(cb) {
       request.get({url: uri, headers: {'User-Agent': 'request'}},
         function (error, response) {
           if (error) {
-            return callback.fail(new Error('Error on GET request to ' + uri +
+            return cb.fail(new Error('Error on GET request to ' + uri +
             ': ' + error.message))
           }
           self.lastResponse = response;
