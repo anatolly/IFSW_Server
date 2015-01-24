@@ -44,22 +44,31 @@ module.exports = {
         };
 
         var descr =  "";
-      descr = containers[1].metadata.description;
-        if (descr != undefined) {
-          // current version doe snot support update. delete metadata frist
-        }
+      // res.json({info: "Available" + containers.length + " containers"});
+
+      for(var i=0; i < containers.length; i++) {
+
+      descr = containers[i].metadata.description;
+      if (descr != undefined) {
+        // current version doe snot support update. delete metadata frist
+      }
       else
-        {
-          descr = 'Container for DICOM data';
-        }
-      containers[1].metadata.access = descr ;
-      client.updateContainerMetadata(containers[1], function (err_u, c){
+      {
+        descr = 'Container for DICOM data';
+      }
+      containers[i].metadata.access = descr ;
+      client.updateContainerMetadata(containers[i], function (err_u, c){
 
         if (err_u) {
           console.log("ERROR="+err_u);
           return res.json({error_text: "ERROR" + err_u});
         }
         res.json({Containers_AFTER: c})});
+
+
+    }
+
+
 
     });
 

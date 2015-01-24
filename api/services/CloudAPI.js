@@ -105,29 +105,31 @@ module.exports = {
     readStream.pipe(writeStream);
   },
 
-  downloadFile: function ( filename, res) {
+  downloadFile: function ( filename, cb) {
 
     var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
-
 
     //download a remote file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
     client.download({
       container: 'my-container',
-      remote: filename },
-      function (err, file) {
-       if(err)
-       {
-         console.log('Error during download of the file from the cloud');
-       }
-        else
-       {
-         // check metadata
-         console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
-         console.log('the downloaded file:'+ JSON.stringify(file));
-       }
-      }).pipe(res);
+      remote: filename }, cb);
+
+    //); //.pipe(result);
+
+    //res.on('error', function(err) {
+    //  // handle your error case
+    //  console.log('Error during download of the file from the cloud. Error:'+ err);
+    //  res.status(404);
+    //  return res;
+    //});
+    //
+    //res.on('success', function(file) {
+    //  console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
+    //  console.log('the downloaded file:'+ JSON.stringify(file));
+    //});
+
   }
 
 
