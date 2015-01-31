@@ -5,10 +5,11 @@
 //var dicomFactoryDictionary = require('./DICOMFactoryDictionary');
 require('./DICOMFactoryDictionary');
 
-
 module.exports = {
 
-  // dicomRawData - dicom parser dataSet is assumed as input parameter
+  /**
+    @dicomRawData - dicom parser dataSet is assumed as input parameter
+  */
   createDICOMEnvelope: function(dicomObjectID, dicomRawData, cb) {
 
     function getTag(tag) {
@@ -19,30 +20,17 @@ module.exports = {
       return attr;
     }
 
-
-// create empty DICOM Envelope object
-//    DICOMEnvelope.create().done(function (err, aEnvelope) {
     aEnvelope = {};
     unknownDICOMDistonaryAttributes = {};
     unknownIFSWAttributes = {};
 
-    // iterate over elements of dicomRawData and initialize properties of the DICOM Envelope
-    // the dataSet.elements object contains properties for each element parsed. The name of the property
-    // is based on the elements tag and looks like 'xGGGGEEEE' where GGGG is the group number and EEEE is the
-    // element number both with lowercase hexadecimal letters. For example, the Series Description DICOM element 0008,103E would
-    // be named 'x0008103e'. Here we iterate over each property (element) so we can build a string describing its
-    // contents to add to the output array
-
-
     for (var propertyName in dicomRawData.elements) {
       var element = dicomRawData.elements[propertyName];
       var tag = getTag(element.tag);
-// The output string begins with the element name (or tag if not in data dictionary), length and VR (if present). VR is undefined for
-// implicit transfer syntaxes
 
       if (tag === undefined) {
-      //resolve the problem with undefined TAG in the dictionary
-      // add info to the corresponding hash
+        //resolve the problem with undefined TAG in the dictionary
+        // add info to the corresponding hash
         unknownDICOMDistonaryAttributes[propertyName]= dicomRawData.string(propertyName);
         console.log("DICOM DICTONARY WARNING: unknown attribute " + propertyName);
       }
@@ -60,8 +48,6 @@ module.exports = {
           // TODO implement type checking of property
           aEnvelope[tag.name] = dicomRawData.string(propertyName);
         }
-
-
       }
     }
 
@@ -78,7 +64,6 @@ module.exports = {
       return cb(aEnvelope);
     });
   }
-
 
 };
 
