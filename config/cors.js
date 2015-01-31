@@ -37,7 +37,7 @@ module.exports.cors = {
   *                                                                          *
   ***************************************************************************/
 
-   allRoutes: true //ALT: To make CORS enabled (site documentation says do it here)
+  // allRoutes: false,
 
   /***************************************************************************
   *                                                                          *

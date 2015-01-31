@@ -34,11 +34,7 @@ module.exports.routes = {
 
   '/': {
     view: 'homepage'
-  },
-  '/prettyinputview': {
-    view: 'prettyinput'
-  },
-
+  }
 
   /***************************************************************************
   *                                                                          *
