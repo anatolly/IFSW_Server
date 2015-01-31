@@ -52,9 +52,8 @@ module.exports =
   },
 
   download: function (req, res) {
-    console.log(req.params.all());
-    //DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
-    DICOMEnvelope.find(req.params.id, function (err, envelopes) {
+    DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
+
 
       var fs = require('fs');
       var filePath =  envelopes[0].DICOMObjectID; //   'ctimage.dcm';
