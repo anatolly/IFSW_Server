@@ -14,10 +14,10 @@ module.exports = function () {
 
   /*------------------- GIVEN clauses -------------------------*/
 
-//  this.Given(/^I am on test cucumber site$/, function (cb) {
-//    console.log('given');
-//    this.visithome('', cb);
-//  });
+  this.Given(/^I am on test cucumber site$/, function (cb) {
+    console.log('given');
+    this.visithome('', cb);
+  });
 
   /*------------------- WHEN clauses -------------------------*/
 

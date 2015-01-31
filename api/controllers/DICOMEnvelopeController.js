@@ -8,7 +8,6 @@
 
 // Reference the dicomParser module
 var dicomParser = require('../../ext/dicomParser');
-var fs = require('fs');
 
 module.exports =
 {
@@ -20,10 +19,6 @@ module.exports =
 
  // This code reads a DICOM P10 file from disk and creates a UInt8Array from it
       var fs = require('fs');
-
-
-
-
 
       var filePath =  files[0].fd; //   'ctimage.dcm';
       var dicomFileAsBuffer = fs.readFileSync(filePath);
