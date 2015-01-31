@@ -53,6 +53,18 @@ var World = function World(cb) {
   };
 
 
+  this.download = function(base_url, param_val, localfilename, cb) {
+    console.log("URL USED:" + base_url+'?id='+param_val);
+    request.get(base_url+'?id='+param_val).on('response', function(response) {
+      console.log(response.statusCode) // 200
+      console.log(response.headers['content-type']) // 'image/png'
+      self.lastResponse = response;
+      cb();
+    }).pipe(fs.createWriteStream(localfilename));
+
+  };
+
+
 
 
     cb();
