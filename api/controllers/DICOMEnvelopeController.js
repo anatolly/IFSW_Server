@@ -7,8 +7,8 @@
 
 
 // Reference the dicomParser module
-var dicomParser = require('../../ext/dicomParser');
-
+//var dicomParser = require('.././dicomParser');
+var dicomParser = require('../../externals/dicomParser');
 module.exports =
 {
  //TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
@@ -37,7 +37,7 @@ module.exports =
 
           console.log("FILE UPLOADED:"+ JSON.stringify(file));
           console.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
-
+          res.statusCode = 200;
           return res.json({
             message: file.length + ' file(s) uploaded successfully!',
             files: file,
