@@ -1,0 +1,95 @@
+
+  <!-- twitter bootstrap CSS stylesheet - not required by cornerstone -->
+  <!--link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet"-->
+
+
+<div class="container">
+
+  <h1>
+    IFSW DICOM File Show (Development UI)
+  </h1>
+
+  Some of parsed meta-data:
+
+  <br>
+  <br>
+  <%= JSON.stringify(imagedata_raw) %>
+  <br>
+
+  <div id="dicomImage" style="width:<%=imagedata_raw.columns*2%>px;height:<%=imagedata_raw.rows*2%>px;">
+  </div>
+
+</div>
+
+<!-- cornerstone depends on jQuery so it must be loaded first-->
+<script src="https://rawgit.com/chafey/cornerstone/master/example/jquery.min.js"></script>
+
+<!-- include the cornerstone library -->
+<script src="https://rawgit.com/chafey/cornerstone/master/dist/cornerstone.js"></script>
+
+<script>
+
+  (function (cs) {
+    var image1PixelData = new Uint16Array([<% var max=0; for(var i=0;i<imagedata.length;i++) {if (imagedata[i] > max) max=imagedata[i];if (i != 0){%>,<%}%><%=imagedata[i]/4%><%}%>]);
+    var image2PixelData = new Uint16Array([]);
+
+    function getExampleImage(imageId) {
+
+      var width = <%=imagedata_raw.rows%>;
+      var height = <%=imagedata_raw.columns%>;
+
+      function getPixelData()
+      {
+        if(imageId == 'example://1')
+        {
+          return image1PixelData;
+        }
+        else if(imageId = 'example://2')
+        {
+          return image2PixelData;
+        }
+        throw "unknown imageId";
+      }
+
+      var image = {
+        imageId: imageId,
+        minPixelValue : 0,
+        maxPixelValue : <%=max/4%>,//257,
+        slope: 1.0,
+        intercept: 0,
+        windowCenter : Math.round(width / 2),
+        windowWidth : width,
+        render: cornerstone.renderGrayscaleImage,
+        getPixelData: getPixelData,
+        rows: height,
+        columns: width,
+        height: height,
+        width: width,
+        color: false,
+        columnPixelSpacing: .8984375,
+        rowPixelSpacing: .8984375,
+        sizeInBytes: width * height * 2
+      };
+
+      var deferred = $.Deferred();
+      deferred.resolve(image);
+      return deferred;
+    }
+
+    // register our imageLoader plugin with cornerstone
+    cs.registerImageLoader('example', getExampleImage);
+
+  }(cornerstone));
+
+</script>
+
+<script>
+  $(document).ready(function() {
+    var imageId = 'example://1';
+    var element = document.getElementById('dicomImage');
+    cornerstone.enable(element);
+    cornerstone.loadImage(imageId).then(function(image) {
+      cornerstone.displayImage(element, image);
+    });
+  });
+</script>
