@@ -7,8 +7,8 @@
 
 //ALT: Original basic file uploading is get from http://sailsjs.org/#/documentation/concepts/File-Uploads
 
-var dicomParserModule = require('../../ext/dicomParser');
-//require('../../ext/dicomParser');
+var dicomParserModule = require('../../externals/dicomParser');
+//require('../../externals/dicomParser');
 
 module.exports = {
   index: function (req,res){
