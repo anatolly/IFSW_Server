@@ -36,7 +36,7 @@ module.exports = {
 
   test: function  (req, res) {
 
-    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080); // 89.109.55.200:8080");
     client.getContainers(function (err, containers) {
         if (err) {
           console.log("ERROR="+err);
@@ -111,7 +111,7 @@ module.exports = {
 
   create: function  (req, res) {
 
-    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");//89.109.55.200:8080");
     client.getContainers(function (err, containers) {
       if (err) {
         console.log("ERROR="+err);
@@ -149,7 +149,7 @@ module.exports = {
 
   download: function (req, res) {
     // create a cloud client
-    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080"); //89.109.55.200:8080");
 
     res.setHeader('Content-disposition', 'attachment; filename=test.dcm')
 
@@ -276,7 +276,7 @@ module.exports = {
     // as in  http://stackoverflow.com/questions/14726052/what-streams-and-pipe-capable-means-in-pkgcloud-in-nodejs
 
       // create a cloud client
-      var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+      var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");//89.109.55.200:8080");
 
        //stream file to the predefined container
     var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
@@ -318,7 +318,7 @@ module.exports = {
 
 
       // create a cloud client
-      var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+      var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");//http://89.109.55.200:8080");
 
       //save local file to the predefined container
      // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage

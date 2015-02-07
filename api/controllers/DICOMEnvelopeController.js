@@ -9,6 +9,8 @@
 // Reference the dicomParser module
 //var dicomParser = require('.././dicomParser');
 var dicomParser = require('../../externals/dicomParser');
+var fs = require('fs');
+
 module.exports =
 {
  //TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
@@ -67,14 +69,14 @@ module.exports =
       }
       else {
 
+        console.log("FILE NAME:"+ envelopes[0].DICOMObjectID);
 
         CloudAPI.downloadFile(envelopes[0].DICOMObjectID,     function (err, file) {
             if(err)
             {
               console.log('Error during download of the file from the cloud. Error:'+ err);
               res.statusCode = 404;
-              res.send("!!!!!!!!!!!!!!!!!!!!!");
-              res.send('404 error: ' + err);
+              res.send("!!!!!!!!!!!!!!!!!!!!! 404 error: " + err);
               return res.end();
 
             }
@@ -94,6 +96,52 @@ module.exports =
           }
         );
       }
+    });
+  },
+
+  //------------------------------------------------------------------------------------------------
+  delete: function (req, res ) {
+    DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
+      if (err) {
+        return res.json({Error: 'Error during delete in DICOMEnvelope:' + err });
+      }
+      else {
+        if (envelopes[0] != null) {
+          CloudAPI.deletefile(envelopes[0].DICOMObjectID, function (err, result) {
+            if (err) {
+              console.log('Error during delete the file from the cloud. Error:' + err);
+              res.statusCode = 404;
+              return res.send("!!!!!!!!!!!!!!!!!!!!! 404 error: " + err);
+            }
+            else {
+
+              DICOMEnvelope.destroy(envelopes[0].id).exec(function (err) {
+                if(err) {
+                  console.log("Error delete of ORM isntance with id " + envelopes[0].id);
+                  return res.json({Failure: "delete ORM instance"});
+                }
+                else {
+                  console.log("delete sucessfull with id " + envelopes[0].id);
+                  return res.json({Sucess: "delete file"});
+                }
+
+
+              }); //destroy ORM instance
+
+            }
+
+          });
+        }
+        else {
+          console.log('Object was not found in ORM. ' + req.param('id'));
+          res.statusCode = 404;
+          return res.send("404 error: " );
+
+        }
+
+      }
+
+
     });
   }
 

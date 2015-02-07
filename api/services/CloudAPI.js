@@ -61,7 +61,7 @@ module.exports = {
   uploadFile: function (filepath, filename, metadata, cb) {
 
     // create a cloud client
-    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");//http://89.109.55.200:8080");
 
     //save local file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
@@ -107,7 +107,7 @@ module.exports = {
 
   downloadFile: function ( filename, cb) {
 
-    var client = CloudAPI.initClient("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080"); //http://89.109.55.200:8080");
 
     //download a remote file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
@@ -129,6 +129,16 @@ module.exports = {
     //  console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
     //  console.log('the downloaded file:'+ JSON.stringify(file));
     //});
+
+  },
+
+  deletefile: function (filename, cb) {
+
+    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");
+
+    client.removeFile("my-container", filename , cb);
+
+
 
   }
 
