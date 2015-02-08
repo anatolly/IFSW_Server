@@ -10,6 +10,19 @@ var fs = require('fs');
 var   AWS = require('aws-sdk');
 var proxy = require('proxy-agent');
 
+/*
+var STORAGE_PROVIDER_URL = "http://192.168.17.111:8080";
+var STORAGE_PROVIDER_LOGIN = "test:tester" ;
+var STORAGE_PROVIDER_KEY = "testing";
+*/
+
+
+var STORAGE_PROVIDER_URL = "http://192.168.17.182:80";
+var STORAGE_PROVIDER_LOGIN = "johndoe:swift" ;
+var STORAGE_PROVIDER_KEY = "tTc2VOlldQAf5TVFK9rlLPeuRPalfUDCLAqDYiSz";
+
+
+
 module.exports = {
 
   initClient: function (a_username, a_passwd, a_service_url) {
@@ -61,7 +74,7 @@ module.exports = {
   uploadFile: function (filepath, filename, metadata, cb) {
 
     // create a cloud client
-    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");//http://89.109.55.200:8080");
+    var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );//http://89.109.55.200:8080");
 
     //save local file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
@@ -107,12 +120,12 @@ module.exports = {
 
   downloadFile: function ( filename, cb) {
 
-    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080"); //http://89.109.55.200:8080");
+    var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL ); //http://89.109.55.200:8080");
 
     //download a remote file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
-    client.download({
+    return client.download({
       container: 'my-container',
       remote: filename }, cb);
 
@@ -134,7 +147,7 @@ module.exports = {
 
   deletefile: function (filename, cb) {
 
-    var client = CloudAPI.initClient("test:tester", "testing", "http://192.168.17.111:8080");
+    var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
     client.removeFile("my-container", filename , cb);
 

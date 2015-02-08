@@ -58,6 +58,7 @@ module.exports = {
     DICOMEnvelope.create(aEnvelope, function (err, aEnvelope) {
       if(err) {
         //TODO implement error handling
+        console.log("Error during crrating ORM Envelope");
         return;
       }
 

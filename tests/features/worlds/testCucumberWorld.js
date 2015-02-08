@@ -22,6 +22,8 @@ module.exports = function () {
       });
     };
 
+
+
     this.visithome = function(path, cb) {
       this.browser.visit(this.homepage(path), function(err, browser, status) {
         cb(err, browser, status);

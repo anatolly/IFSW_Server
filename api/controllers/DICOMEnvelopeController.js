@@ -30,23 +30,34 @@ module.exports =
       var dataSet = dicomParser.parseDicom(dicomFileAsByteArray);
       //var patientName = dataSet.string('x00100020');
       //console.log('Patient Name = '+ patientName);
-      DICOMFactory.createDICOMEnvelope(filePath, dataSet, function(aEnvelope) {
+      DICOMEnvelope.count().exec(function (err, foundAsLastUID) {
 
-        //TODO implement generation of a proper filename (second parameter)
-        CloudAPI.uploadFile(filePath, filePath, aEnvelope, function (err, file) {
+        if (err) {
+          return res.json({error:" error in ORM"});
+        }
+        else {
+          foundAsLastUID++;
+          console.log("foundLastUID");
+          console.log(foundAsLastUID);
+          DICOMFactory.createDICOMEnvelope(foundAsLastUID.toString(), dataSet, function(aEnvelope) {
+            CloudAPI.uploadFile(filePath, aEnvelope.DICOMObjectID, aEnvelope, function (err, file) {
 
-          if (err)  return res.json({Error: 'Error text:' + err });
+              if (err)  return res.json({Error: 'Error text:' + err });
 
-          console.log("FILE UPLOADED:"+ JSON.stringify(file));
-          console.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
-          res.statusCode = 200;
-          return res.json({
-            message: file.length + ' file(s) uploaded successfully!',
-            files: file,
-            envelope: aEnvelope
+              console.log("FILE UPLOADED:"+ JSON.stringify(file));
+              console.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
+              res.statusCode = 200;
+              return res.json({
+                message: file.length + ' file(s) uploaded successfully!',
+                files: file,
+                envelope: aEnvelope
+              });
+            } )
           });
-        } )
+
+        }
       });
+
     });
   },
 
@@ -68,33 +79,106 @@ module.exports =
         return res.json({Error: 'Error text:' + err });
       }
       else {
+        if (envelopes[0] != null) {
 
-        console.log("FILE NAME:"+ envelopes[0].DICOMObjectID);
+          console.log("ENVELOPE ID = " + envelopes[0].id);
+          console.log("FILE NAME:"+ envelopes[0].DICOMObjectID);
+         // res.contentType("application/octet-stream");
+         // res.set("Content-Disposition", "attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id + ".dcm");
 
-        CloudAPI.downloadFile(envelopes[0].DICOMObjectID,     function (err, file) {
-            if(err)
-            {
-              console.log('Error during download of the file from the cloud. Error:'+ err);
-              res.statusCode = 404;
-              res.send("!!!!!!!!!!!!!!!!!!!!! 404 error: " + err);
-              return res.end();
+
+         /* var ostream = CloudAPI.downloadFile(envelopes[0].DICOMObjectID,     function (err, file) {
+              if(err)
+              {
+                console.log('Error during download of the file from the cloud. Error:'+ err);
+                res.statusCode = 404;
+                return res.send("!!!!!!!!!!!!!!!!!!!!! 404 error: " + err);
+
+              }
+              else
+              {
+                console.log("FILE OBJECT:");
+                console.log(file);
+
+                // check metadata
+                console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
+                console.log('the downloaded file:'+ JSON.stringify(file));
+
+                 res.contentType("application/octet-stream");
+                 res.set("Content-Disposition", "attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id + ".dcm");
+
+                file.
+                ostream.pipe(res);
+              }
 
             }
-            else
-            {
-              // check metadata
-              console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
-              console.log('the downloaded file:'+ JSON.stringify(file));
+          );
+         */
+          var ostream = CloudAPI.downloadFile(envelopes[0].DICOMObjectID);
+          /*
+           function doQuery(){
+           var r = request(url)
+           r.pause()
+           r.on('response', function (resp) {
+           if(resp.statusCode === 200){
+           r.pipe(new WritableStream()) //pipe to where you want it to go
+           r.resume()
+           }else{
+           setTimeout(doQuery,1000)
+           }
+           })
+           }
+           */
+          ostream.pause();
+          ostream.on('error', function (resp) {
+            console.log("ON Error event");
+            console.log(resp);
+            return res.send(404, "No such file");
+          });
+
+          ostream.once('data', function (data_chunk) {
+            console.log("ONCE Data event");
+            var first_resp = data_chunk.toString();
+            if (first_resp == "NoSuchKey") {
+              console.log("No such key response from cloud storage");
+              ostream.end();
+              return res.send(404, "No such File");
+
+            } else {
               res.contentType("application/octet-stream");
               res.set("Content-Disposition", "attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id + ".dcm");
-              //res.set("Content-Length","132914");
-              //res.set("ETag","758367725");
-              //alternative to setup headers - res.setHeader('Content-disposition', 'attachment; filename=test.jpg')
-             //TODO reimplement without creating local file !
-              fs.createReadStream(file.name).pipe(res);
+              res.write(data_chunk);
+              ostream.pipe(res);
+              ostream.resume();
             }
-          }
-        );
+          });
+
+          ostream.on('response', function (resp) {
+            console.log("ON Response event");
+            console.log(resp);
+            return res.send(404, "No such file");
+          });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+        else {
+          console.log('Object was not found in ORM. ' + req.param('id'));
+          res.statusCode = 404;
+          return res.send("404 error: " );
+        }
+
       }
     });
   },

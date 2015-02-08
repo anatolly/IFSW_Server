@@ -5,13 +5,13 @@ var jsonPath = require('JSONPath').eval;
 
 
 module.exports = function () {
-  console.log('"Cloud probe" feature starts');
+  console.log('"Cloud probe" steps are loaded');
 
 
   /*------------------- STEPS SETUP -------------------------*/
 
   // this.World = require('../world/testCucumberWorld.js').World;
-  this.World = require('../world/testRequestWorld.js').World;
+  this.World = require('../worlds/testRequestWorld.js').World;
 
   /*------------------- GIVEN clauses -------------------------*/
 
@@ -32,7 +32,9 @@ module.exports = function () {
 
   this.When(/^I upload a valid DICOM file$/, function (cb) {
 
-    this.upload("http://localhost:1337/v1.0/DICOMEnvelope/upload", "/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm", cb);
+    this.upload("http://localhost:1337/v1.0/DICOMEnvelope/upload",
+                "/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm",
+                cb);
 
     // cb.pending();
   });
