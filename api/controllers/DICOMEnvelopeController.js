@@ -158,20 +158,6 @@ module.exports =
             console.log(resp);
             return res.send(404, "No such file");
           });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
         else {
           console.log('Object was not found in ORM. ' + req.param('id'));
@@ -191,43 +177,97 @@ module.exports =
       }
       else {
         if (envelopes[0] != null) {
-          CloudAPI.deletefile(envelopes[0].DICOMObjectID, function (err, result) {
-            if (err) {
-              console.log('Error during delete the file from the cloud. Error:' + err);
-              res.statusCode = 404;
-              return res.send("!!!!!!!!!!!!!!!!!!!!! 404 error: " + err);
+          _deleteObjectFromStorage(envelopes[0], function (result) {
+            if(result != null){
+              res.statusCode = result.statusCode;
+              return res.json(result.result);
             }
-            else {
-
-              DICOMEnvelope.destroy(envelopes[0].id).exec(function (err) {
-                if(err) {
-                  console.log("Error delete of ORM isntance with id " + envelopes[0].id);
-                  return res.json({Failure: "delete ORM instance"});
-                }
-                else {
-                  console.log("delete sucessfull with id " + envelopes[0].id);
-                  return res.json({Sucess: "delete file"});
-                }
-
-
-              }); //destroy ORM instance
-
-            }
-
-          });
+          } );
         }
         else {
           console.log('Object was not found in ORM. ' + req.param('id'));
           res.statusCode = 404;
           return res.send("404 error: " );
-
         }
-
       }
 
 
     });
+  },
+
+  //---------------------------------------------------------------------------------
+  deleteHeap: function (req, res) {
+    var d = new Date(req.param('y'),req.param('mo')-1,req.param('d'),req.param('h'),req.param('mi'),req.param('s'));
+    var buffer = "";
+
+    DICOMEnvelope.find({where:{'createdAt': {'<': d } }, limit: req.param('limit'), sort: 'createdAt ASC'}, function (err, envelopes) {
+      if (err) {
+        return res.json({Error: 'Error during Massive Delete HEAP in DICOMEnvelope:' + err });
+      }
+
+      else {
+        console.log("Envelopes output");
+
+        var final = false;
+        var i = 0;
+        //for(var i=0; i < envelopes.length; i++)
+        while(final == false)
+        {
+          console.log("Envelope["+i+"]");
+          console.log(envelopes[i]);
+
+          if (envelopes[i] != null) {
+            _deleteObjectFromStorage(envelopes[i], function (result) {
+
+              //var a = i;
+
+              if(result != null){
+                //res.statusCode = result.statusCode;
+                buffer = buffer + result.result;
+
+                if (i == envelopes.length -1 )  {
+                  res.send("AAAAAA:" +  buffer);
+                  final = true;
+                }
+
+              }
+              i++;
+
+            } );
+          }
+          else {
+            console.log('Object was not found in ORM. ' + req.param('id'));
+            res.statusCode = 404;
+            return res.send("404 error: " );
+          }
+
+       }
+      }
+    })
   }
 
 };
 
+//====================================== INTERNAL UTILITY FUNCTIONS ================================
+
+function _deleteObjectFromStorage (envelope, cb) {
+  CloudAPI.deletefile(envelope.DICOMObjectID, function (err, result) {
+    if (err) {
+      console.log('Error during delete the file from the cloud. Error:' + err);
+      cb({statusCode: 404, result: "Envelope ID:" + envelope.id +" !!!!!!!!!!!!!!!!!!!!! 404 error: " + err });
+    }
+    else {
+
+      DICOMEnvelope.destroy(envelope.id).exec(function (err) {
+        if (err) {
+          console.log("Error delete of ORM isntance with id " + envelope.id);
+          cb({statusCode: 500, result: "Failure: delete ORM instance" });
+        }
+        else {
+          console.log("delete sucessfull with id " + envelope.id);
+          cb({statusCode: 200, result: "Sucess: delete file "});
+        }
+      }); //destroy ORM instance
+    }
+  });
+}
