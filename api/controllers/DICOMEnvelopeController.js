@@ -198,7 +198,6 @@ module.exports =
   //---------------------------------------------------------------------------------
   deleteHeap: function (req, res) {
     var d = new Date(req.param('y'),req.param('mo')-1,req.param('d'),req.param('h'),req.param('mi'),req.param('s'));
-    var buffer = "";
 
     DICOMEnvelope.find({where:{'createdAt': {'<': d } }, limit: req.param('limit'), sort: 'createdAt ASC'}, function (err, envelopes) {
       if (err) {
@@ -206,33 +205,31 @@ module.exports =
       }
 
       else {
-        console.log("Envelopes output");
 
-        var final = false;
-        var i = 0;
-        //for(var i=0; i < envelopes.length; i++)
-        while(final == false)
-        {
+        var completed = 0;
+        var max_status_code = 0;
+
+
+        for(var i=0; i < envelopes.length; i++) {
           console.log("Envelope["+i+"]");
           console.log(envelopes[i]);
 
           if (envelopes[i] != null) {
+
             _deleteObjectFromStorage(envelopes[i], function (result) {
 
-              //var a = i;
-
-              if(result != null){
+             if(result != null){
                 //res.statusCode = result.statusCode;
-                buffer = buffer + result.result;
+                buffer = "\n" + result.result;
+                res.write(result.result);
+                if (max_status_code < result.statusCode) {max_status_code = result.statusCode; }
+                completed++;
 
-                if (i == envelopes.length -1 )  {
-                  res.send("AAAAAA:" +  buffer);
-                  final = true;
+                if (completed == envelopes.length) {
+                  res.statusCode = max_status_code;
+                  res.end();
                 }
-
-              }
-              i++;
-
+               }
             } );
           }
           else {
@@ -240,8 +237,11 @@ module.exports =
             res.statusCode = 404;
             return res.send("404 error: " );
           }
-
        }
+        if (envelopes.length == 0) {
+          res.statusCode = 404;
+          return res.send("No entries found");
+        }
       }
     })
   }
