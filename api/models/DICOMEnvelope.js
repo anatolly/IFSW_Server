@@ -15,17 +15,36 @@ module.exports =
     toJSON: function() {
 
       var object = this.toObject();
-      unk1 = JSON.parse(object.unknownDICOMDictionaryAttributes);
-      unk2 = JSON.parse(object.unknownIFSWAttributes);
+      console.log('UNK');
+      console.log(object.unknownDICOMDictionaryAttributes);
+      console.log(object.unknownIFSWAttributes);
+
+      try {
+        unk1 = JSON.parse(object.unknownDICOMDictionaryAttributes);
+      }
+      catch (e)
+      {
+        console.log("EXECPTION DURIN REVERSE PARSING DICOMDictionaryAttributes"+e);
+        unk1={};
+      }
+
+      try {
+        unk2 = JSON.parse(object.unknownIFSWAttributes);
+      }
+      catch (e) {
+        console.log("EXECPTION DURIN REVERSE PARSING IFSWAAttributes"+e);
+        unk2 = {};
+      }
 
       object.unknownDICOMDictionaryAttributes = unk1;
       object.unknownIFSWAttributes = unk2;
+
       return object;
 
     },
 
-    unknownDICOMDictionaryAttributes: 'string', // a JSON -encoded hash of unknown attributes for DICOM Dictionary
-    unknownIFSWAttributes: 'string', // a JSON -encoded hash of unknown attributes for IFSW system
+    unknownDICOMDictionaryAttributes: {type:'string', size:20480}, // a JSON -encoded hash of unknown attributes for DICOM Dictionary
+    unknownIFSWAttributes: {type:'string', size:20480}, // a JSON -encoded hash of unknown attributes for IFSW system
 
     patientName: 'string',
     patientDOB: 'date', // DOB = Date of Birth
