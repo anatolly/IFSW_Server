@@ -10,18 +10,10 @@ var fs = require('fs');
 var   AWS = require('aws-sdk');
 var proxy = require('proxy-agent');
 
-/*
-var STORAGE_PROVIDER_URL = "http://192.168.17.111:8080";
-var STORAGE_PROVIDER_LOGIN = "test:tester" ;
-var STORAGE_PROVIDER_KEY = "testing";
-*/
-
-
-var STORAGE_PROVIDER_URL = "http://192.168.17.182:80";
-var STORAGE_PROVIDER_LOGIN = "johndoe:swift" ;
-var STORAGE_PROVIDER_KEY = "tTc2VOlldQAf5TVFK9rlLPeuRPalfUDCLAqDYiSz";
-
-
+var STORAGE_PROVIDER_URL = sails.config.cloudStorageProviders.url;
+var STORAGE_PROVIDER_LOGIN = sails.config.cloudStorageProviders.apiLogin ;
+var STORAGE_PROVIDER_KEY = sails.config.cloudStorageProviders.apiKey;
+var STORAGE_PROVIDER_CONTAINER = sails.config.cloudStorageProviders.container;
 
 module.exports = {
 
@@ -80,7 +72,7 @@ module.exports = {
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
     var readStream = fs.createReadStream(filepath);
-    var writeStream = client.upload({ container: 'my-container', remote: filename});
+    var writeStream = client.upload({ container: STORAGE_PROVIDER_CONTAINER, remote: filename});
 
     writeStream.on('error', function(err)
     {
@@ -126,7 +118,7 @@ module.exports = {
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
     return client.download({
-      container: 'my-container',
+      container: STORAGE_PROVIDER_CONTAINER,
       remote: filename }, cb);
 
     //); //.pipe(result);
@@ -149,7 +141,7 @@ module.exports = {
 
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
-    client.removeFile("my-container", filename , cb);
+    client.removeFile(STORAGE_PROVIDER_CONTAINER, filename , cb);
 
 
 
