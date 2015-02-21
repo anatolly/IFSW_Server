@@ -8,7 +8,7 @@
 var fs = require('fs');
 
 var   AWS = require('aws-sdk');
-var proxy = require('proxy-agent');
+// var proxy = require('proxy-agent');
 
 var STORAGE_PROVIDER_URL = sails.config.cloudStorageProviders.url;
 var STORAGE_PROVIDER_LOGIN = sails.config.cloudStorageProviders.apiLogin ;

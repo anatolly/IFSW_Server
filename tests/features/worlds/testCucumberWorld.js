@@ -1,3 +1,10 @@
+/*
+
+
+--- JUST FOR THE REFERENCE
+--- a template for other cucumber worlds
+
+
 var zombie = require("zombie");
 
 module.exports = function () {
@@ -34,3 +41,4 @@ module.exports = function () {
   };
 
 };
+*/
