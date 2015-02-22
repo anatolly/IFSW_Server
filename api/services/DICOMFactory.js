@@ -32,7 +32,7 @@ module.exports = {
         //resolve the problem with undefined TAG in the dictionary
         // add info to the corresponding hash
         unknownDICOMDistonaryAttributes[propertyName]= dicomRawData.string(propertyName);
-        console.log("DICOM DICTONARY WARNING: unknown attribute " + propertyName);
+        sails.log("DICOM DICTONARY WARNING: unknown attribute " + propertyName);
       }
       else {
         // tag was found
@@ -41,7 +41,7 @@ module.exports = {
           //resolve the problem of mismatch between DICOMEnvelope model spec and Dictionary table
           // add info to the corresponding hash
           unknownIFSWAttributes[propertyName]= dicomRawData.string(propertyName);
-          console.log("IFSW WARNING: unknown attribute " + propertyName);
+          sails.log("IFSW WARNING: unknown attribute " + propertyName);
         }
         else {
           // correspondence between the model and the dictionary is assured
@@ -58,7 +58,7 @@ module.exports = {
     DICOMEnvelope.create(aEnvelope, function (err, aEnvelope) {
       if(err) {
         //TODO implement error handling
-        console.log("Error during crrating ORM Envelope");
+        sails.log("Error during crrating ORM Envelope");
         return;
       }
 

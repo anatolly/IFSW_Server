@@ -27,7 +27,7 @@ module.exports = {
 
     client.getContainers(function (err, containers) {
       if (err) {
-        console.log("ERROR="+err);
+        sails.log("ERROR="+err);
         return res.json({error_text: "ERROR" + err});
       };
 
@@ -45,7 +45,7 @@ module.exports = {
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
     client.getContainers(function (err, containers) {
         if (err) {
-          console.log("ERROR="+err);
+          sails.log("ERROR="+err);
           return res.json({error_text: "ERROR" + err});
         };
 
@@ -66,7 +66,7 @@ module.exports = {
       client.updateContainerMetadata(containers[i], function (err_u, c){
 
         if (err_u) {
-          console.log("ERROR="+err_u);
+          sails.log("ERROR="+err_u);
           return res.json({error_text: "ERROR" + err_u});
         }
         res.json({Containers_AFTER: c})});
@@ -89,14 +89,14 @@ module.exports = {
 
     client.getContainers(function (err, containers) {
       if (err) {
-        console.log("ERROR="+err);
+        sails.log("ERROR="+err);
         return res.json({error_text: "ERROR" + err});
       };
 
     //  client.createContainer({name: 'bucket---1', Key: 'key', Body: 'body'}, function (err, container){
     //  {
     //    if (err) {
-    //      console.log("ERROR="+err);
+    //      sails.log("ERROR="+err);
     //      return res.json({error_text: "ERROR" + err});
     //    }
     //    return res.json({Container: container});
@@ -105,7 +105,7 @@ module.exports = {
 
         client.s3.createBucket({Bucket: 'my-container/' }, function (err, container) {
           if (err) {
-             console.log("ERROR="+err);
+             sails.log("ERROR="+err);
              return res.json({error_text: "ERROR" + err});
            }
            return res.json({Container: container});
@@ -120,7 +120,7 @@ module.exports = {
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
     client.getContainers(function (err, containers) {
       if (err) {
-        console.log("ERROR="+err);
+        sails.log("ERROR="+err);
         return res.json({error_text: "ERROR" + err});
       };
 

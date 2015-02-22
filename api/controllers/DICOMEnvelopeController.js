@@ -11,13 +11,21 @@
 var dicomParser = require('../../externals/dicomParser');
 var fs = require('fs');
 
+var tempMaxCount = 0;
+
 module.exports =
 {
  //TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
   upload: function  (req, res) {
+
     req.file('dicom_file').upload(function (err, files) {
-      if (err)
+
+     if (err)
+      {
+        sails.log.error('file upload Sailor Error :' + err);
         return res.serverError(err);
+      }
+
 
  // This code reads a DICOM P10 file from disk and creates a UInt8Array from it
       var fs = require('fs');
@@ -29,7 +37,7 @@ module.exports =
       // Now that we have the Uint8array, parse it and extract the patient name
       var dataSet = dicomParser.parseDicom(dicomFileAsByteArray);
       //var patientName = dataSet.string('x00100020');
-      //console.log('Patient Name = '+ patientName);
+      //sails.log('Patient Name = '+ patientName);
       DICOMEnvelope.count().exec(function (err, foundAsLastUID) {
 
         if (err) {
@@ -37,18 +45,24 @@ module.exports =
         }
         else {
           foundAsLastUID++;
-          console.log("foundLastUID");
-          console.log(foundAsLastUID);
-          DICOMFactory.createDICOMEnvelope(foundAsLastUID.toString(), dataSet, function(aEnvelope) {
+          tempMaxCount++;
+          sails.log("foundLastUID");
+          sails.log(foundAsLastUID);
+//          DICOMFactory.createDICOMEnvelope(foundAsLastUID.toString(), dataSet, function(aEnvelope) {
+          DICOMFactory.createDICOMEnvelope(tempMaxCount.toString(), dataSet, function(aEnvelope) {
             CloudAPI.uploadFile(filePath, aEnvelope.DICOMObjectID, aEnvelope, function (err, file) {
 
-              if (err)  return res.json({Error: 'Error text:' + err });
+              if (err)  {
 
-              console.log("FILE UPLOADED:"+ JSON.stringify(file));
-              console.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
+                sails.log.error('Cloud API Error :' + err);
+                return res.json({Error: 'Error text:' + err });
+              }
+
+              sails.log("FILE UPLOADED:"+ JSON.stringify(file));
+              sails.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
               res.statusCode = 200;
               return res.json({
-                message: file.length + ' file(s) uploaded successfully!',
+                message: 'File uploaded successfully!',
                 files: file,
                 envelope: aEnvelope
               });
@@ -81,8 +95,8 @@ module.exports =
       else {
         if (envelopes[0] != null) {
 
-          console.log("ENVELOPE ID = " + envelopes[0].id);
-          console.log("FILE NAME:"+ envelopes[0].DICOMObjectID);
+          sails.log("ENVELOPE ID = " + envelopes[0].id);
+          sails.log("FILE NAME:"+ envelopes[0].DICOMObjectID);
          // res.contentType("application/octet-stream");
          // res.set("Content-Disposition", "attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id + ".dcm");
 
@@ -90,19 +104,19 @@ module.exports =
          /* var ostream = CloudAPI.downloadFile(envelopes[0].DICOMObjectID,     function (err, file) {
               if(err)
               {
-                console.log('Error during download of the file from the cloud. Error:'+ err);
+                sails.log('Error during download of the file from the cloud. Error:'+ err);
                 res.statusCode = 404;
                 return res.send("!!!!!!!!!!!!!!!!!!!!! 404 error: " + err);
 
               }
               else
               {
-                console.log("FILE OBJECT:");
-                console.log(file);
+                sails.log("FILE OBJECT:");
+                sails.log(file);
 
                 // check metadata
-                console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
-                console.log('the downloaded file:'+ JSON.stringify(file));
+                sails.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
+                sails.log('the downloaded file:'+ JSON.stringify(file));
 
                  res.contentType("application/octet-stream");
                  res.set("Content-Disposition", "attachment; filename=IFSW_DICOMObject_ID_" + envelopes[0].id + ".dcm");
@@ -131,16 +145,16 @@ module.exports =
            */
           ostream.pause();
           ostream.on('error', function (resp) {
-            console.log("ON Error event");
-            console.log(resp);
+            sails.log("ON Error event");
+            sails.log(resp);
             return res.send(404, "No such file");
           });
 
           ostream.once('data', function (data_chunk) {
-            console.log("ONCE Data event");
+            sails.log("ONCE Data event");
             var first_resp = data_chunk.toString();
             if (first_resp == "NoSuchKey") {
-              console.log("No such key response from cloud storage");
+              sails.log("No such key response from cloud storage");
               ostream.end();
               return res.send(404, "No such File");
 
@@ -154,13 +168,13 @@ module.exports =
           });
 
           ostream.on('response', function (resp) {
-            console.log("ON Response event");
-            console.log(resp);
+            sails.log("ON Response event");
+            sails.log(resp);
             return res.send(404, "No such file");
           });
         }
         else {
-          console.log('Object was not found in ORM. ' + req.param('id'));
+          sails.log('Object was not found in ORM. ' + req.param('id'));
           res.statusCode = 404;
           return res.send("404 error: " );
         }
@@ -185,7 +199,7 @@ module.exports =
           } );
         }
         else {
-          console.log('Object was not found in ORM. ' + req.param('id'));
+          sails.log('Object was not found in ORM. ' + req.param('id'));
           res.statusCode = 404;
           return res.send("404 error: " );
         }
@@ -211,8 +225,8 @@ module.exports =
 
 
         for(var i=0; i < envelopes.length; i++) {
-          console.log("Envelope["+i+"]");
-          console.log(envelopes[i]);
+          sails.log("Envelope["+i+"]");
+          sails.log(envelopes[i]);
 
           if (envelopes[i] != null) {
 
@@ -233,7 +247,7 @@ module.exports =
             } );
           }
           else {
-            console.log('Object was not found in ORM. ' + req.param('id'));
+            sails.log('Object was not found in ORM. ' + req.param('id'));
             res.statusCode = 404;
             return res.send("404 error: " );
           }
@@ -253,18 +267,18 @@ module.exports =
 function _deleteObjectFromStorage (envelope, cb) {
   CloudAPI.deletefile(envelope.DICOMObjectID, function (err, result) {
     if (err) {
-      console.log('Error during delete the file from the cloud. Error:' + err);
+      sails.log('Error during delete the file from the cloud. Error:' + err);
       cb({statusCode: 404, result: "Envelope ID:" + envelope.id +" !!!!!!!!!!!!!!!!!!!!! 404 error: " + err });
     }
     else {
 
       DICOMEnvelope.destroy(envelope.id).exec(function (err) {
         if (err) {
-          console.log("Error delete of ORM isntance with id " + envelope.id);
+          sails.log("Error delete of ORM isntance with id " + envelope.id);
           cb({statusCode: 500, result: "Failure: delete ORM instance" });
         }
         else {
-          console.log("delete sucessfull with id " + envelope.id);
+          sails.log("delete sucessfull with id " + envelope.id);
           cb({statusCode: 200, result: "Sucess: delete file "});
         }
       }); //destroy ORM instance

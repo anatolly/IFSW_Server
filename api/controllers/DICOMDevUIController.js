@@ -38,7 +38,7 @@ module.exports = {
         for (var propertyName in dataSet.elements) {
           var element = dataSet.elements[propertyName];
           if (element.length > 500)
-            console.log(element);
+            sails.log(element);
         }
 
 
@@ -47,7 +47,7 @@ module.exports = {
         //var image = dataSet.string("x7fe00010");
         //var image = dataSet.elements.x7fe00010;
 
-        //console.log("IMAGE LENGTH=" + image.length);
+        //sails.log("IMAGE LENGTH=" + image.length);
 
         image_metadata = {
           Lrows: dataSet.elements.x00280010,

@@ -96,13 +96,13 @@ module.exports = {
 
       };
 
-      console.log('updated file:'+JSON.stringify(file));
-      console.log('updated file metadata:'+JSON.stringify(file.metadata));
+      sails.log('updated file:'+JSON.stringify(file));
+      sails.log('updated file metadata:'+JSON.stringify(file.metadata));
 
 
-      client.updateFileMetadata(file.container, file, cb );
+       client.updateFileMetadata(file.container, file, cb );
 
-      //console.log(file);
+      //sails.log(file);
       //cb(null, file);
 
     });
@@ -125,14 +125,14 @@ module.exports = {
 
     //res.on('error', function(err) {
     //  // handle your error case
-    //  console.log('Error during download of the file from the cloud. Error:'+ err);
+    //  sails.log('Error during download of the file from the cloud. Error:'+ err);
     //  res.status(404);
     //  return res;
     //});
     //
     //res.on('success', function(file) {
-    //  console.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
-    //  console.log('the downloaded file:'+ JSON.stringify(file));
+    //  sails.log('Meta data of the downloaded file:'+ JSON.stringify(file.metadata));
+    //  sails.log('the downloaded file:'+ JSON.stringify(file));
     //});
 
   },

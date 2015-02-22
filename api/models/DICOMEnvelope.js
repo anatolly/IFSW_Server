@@ -15,16 +15,16 @@ module.exports =
     toJSON: function() {
 
       var object = this.toObject();
-      console.log('UNK');
-      console.log(object.unknownDICOMDictionaryAttributes);
-      console.log(object.unknownIFSWAttributes);
+      sails.log('UNK');
+      sails.log(object.unknownDICOMDictionaryAttributes);
+      sails.log(object.unknownIFSWAttributes);
 
       try {
         unk1 = JSON.parse(object.unknownDICOMDictionaryAttributes);
       }
       catch (e)
       {
-        console.log("EXECPTION DURIN REVERSE PARSING DICOMDictionaryAttributes"+e);
+        sails.log("EXECPTION DURIN REVERSE PARSING DICOMDictionaryAttributes"+e);
         unk1={};
       }
 
@@ -32,7 +32,7 @@ module.exports =
         unk2 = JSON.parse(object.unknownIFSWAttributes);
       }
       catch (e) {
-        console.log("EXECPTION DURIN REVERSE PARSING IFSWAAttributes"+e);
+        sails.log("EXECPTION DURIN REVERSE PARSING IFSWAAttributes"+e);
         unk2 = {};
       }
 
