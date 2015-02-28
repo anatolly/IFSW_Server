@@ -80,6 +80,10 @@ for(var actors = 0; actors < specifiedCount; actors ++) {
         console.log("ERROR in parsing message");
         errorUploadCount++;
       }
+      else if(message.envelope == null) {
+        console.log("ERROR in parsing message - Envelope is NULL. Message is :"+message);
+        errorUploadCount++;
+      }
       else {
 
        // console.log(message.envelope.id);
