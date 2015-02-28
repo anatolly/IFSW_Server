@@ -28,6 +28,11 @@ module.exports = {
       useServiceCatalog: false
     });
 
+
+    client.on('error', function (err) {
+      console.log("Cloud client error:"+err);
+    });
+
     return client;
 
   },
@@ -71,43 +76,63 @@ module.exports = {
     //save local file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
-    var readStream = fs.createReadStream(filepath);
-    var writeStream = client.upload({ container: STORAGE_PROVIDER_CONTAINER, remote: filename});
 
-    writeStream.on('error', function(err)
-    {
-      // handle your error case
-      cb(err, null);
+    client.getContainers(function(err, data) {
+
+      if (err) {
+      console.log("ERROR:"+err);
+        cb(err,null);
+
+      }
+      else {
+
+        var readStream = fs.createReadStream(filepath);
+        var writeStream = client.upload({ container: STORAGE_PROVIDER_CONTAINER, remote: filename});
+
+        writeStream.on('error', function(err)
+        {
+          // handle your error case
+          console.log("ERROR--------"+err);
+
+          cb(err, null);
+        });
+
+        readStream.on('error', function (d) {
+          console.log("ERROR in readstream:"+d);
+        });
+
+        writeStream.on('success', function(file)
+        {
+          // success, file will be a File model
+          // write metadata to the cloud
+          // file.metadata = {test : 'aaaa'}; //JSON.stringify(metadata);
+
+          file.metadata = {studyDescription: metadata.StudyDescription,
+            patientID: metadata.PatientID,
+            all_1: new Buffer(JSON.stringify(metadata)).toString('base64').substr(0,250),
+            all_2: new Buffer(JSON.stringify(metadata)).toString('base64').substr(251,250),
+            all_3: new Buffer(JSON.stringify(metadata)).toString('base64').substr(502,250),
+            all_4: new Buffer(JSON.stringify(metadata)).toString('base64').substr(753,250),
+            all_5: new Buffer(JSON.stringify(metadata)).toString('base64').substr(904,250)
+
+          };
+
+          sails.log('updated file:'+JSON.stringify(file));
+          sails.log('updated file metadata:'+JSON.stringify(file.metadata));
+
+
+          client.updateFileMetadata(file.container, file, cb );
+
+          //sails.log(file);
+          //cb(null, file);
+
+        });
+
+        readStream.pipe(writeStream).on('error', function (err) { sails.error.log("ERROR !!!")});
+      }
+
     });
 
-    writeStream.on('success', function(file)
-    {
-      // success, file will be a File model
-      // write metadata to the cloud
-     // file.metadata = {test : 'aaaa'}; //JSON.stringify(metadata);
-
-      file.metadata = {studyDescription: metadata.StudyDescription,
-                        patientID: metadata.PatientID,
-                        all_1: new Buffer(JSON.stringify(metadata)).toString('base64').substr(0,250),
-                        all_2: new Buffer(JSON.stringify(metadata)).toString('base64').substr(251,250),
-                        all_3: new Buffer(JSON.stringify(metadata)).toString('base64').substr(502,250),
-                        all_4: new Buffer(JSON.stringify(metadata)).toString('base64').substr(753,250),
-                        all_5: new Buffer(JSON.stringify(metadata)).toString('base64').substr(904,250)
-
-      };
-
-      sails.log('updated file:'+JSON.stringify(file));
-      sails.log('updated file metadata:'+JSON.stringify(file.metadata));
-
-
-       client.updateFileMetadata(file.container, file, cb );
-
-      //sails.log(file);
-      //cb(null, file);
-
-    });
-
-    readStream.pipe(writeStream);
   },
 
   downloadFile: function ( filename, cb) {

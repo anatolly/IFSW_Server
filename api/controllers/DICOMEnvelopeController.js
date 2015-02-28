@@ -49,25 +49,33 @@ module.exports =
           sails.log("foundLastUID");
           sails.log(foundAsLastUID);
 //          DICOMFactory.createDICOMEnvelope(foundAsLastUID.toString(), dataSet, function(aEnvelope) {
-          DICOMFactory.createDICOMEnvelope(tempMaxCount.toString(), dataSet, function(aEnvelope) {
-            CloudAPI.uploadFile(filePath, aEnvelope.DICOMObjectID, aEnvelope, function (err, file) {
+          try {
+            DICOMFactory.createDICOMEnvelope(tempMaxCount.toString(), dataSet, function (aEnvelope) {
+              try {
+                CloudAPI.uploadFile(filePath, aEnvelope.DICOMObjectID, aEnvelope, function (err, file) {
 
-              if (err)  {
+                  if (err) {
 
-                sails.log.error('Cloud API Error :' + err);
-                return res.json({Error: 'Error text:' + err });
+                    sails.log.error('Cloud API Error :' + err);
+                    return res.json({Error: 'Error text:' + err});
+                  }
+
+                  sails.log("FILE UPLOADED:" + JSON.stringify(file));
+                  sails.log("FILE UPLOADED METADATA:" + JSON.stringify(file.metadata));
+                  res.statusCode = 200;
+                  return res.json({
+                    message: 'File uploaded successfully!',
+                    files: file,
+                    envelope: aEnvelope
+                  });
+                })
               }
-
-              sails.log("FILE UPLOADED:"+ JSON.stringify(file));
-              sails.log("FILE UPLOADED METADATA:"+ JSON.stringify(file.metadata));
-              res.statusCode = 200;
-              return res.json({
-                message: 'File uploaded successfully!',
-                files: file,
-                envelope: aEnvelope
-              });
-            } )
-          });
+              catch (e) {
+                sails.error.log("Exception during upload file" + e);
+              }
+            });
+          }
+          catch (e) { sails.error.log("Exception during evelope"+e)};
 
         }
       });
@@ -75,6 +83,7 @@ module.exports =
     });
   },
 
+  /*
   find: function (req, res) {
     DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
 
@@ -84,7 +93,8 @@ module.exports =
 
     });
   },
-
+*/
+  
   download: function (req, res) {
     DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
 
