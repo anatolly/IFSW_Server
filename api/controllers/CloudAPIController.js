@@ -4,10 +4,11 @@
 
 var S3_HOST_ADDRESS = 'http://192.168.17.145';
 
-var STORAGE_PROVIDER_URL = "http://192.168.17.182:80";
-var STORAGE_PROVIDER_LOGIN = "johndoe:swift" ;
-var STORAGE_PROVIDER_KEY = "tTc2VOlldQAf5TVFK9rlLPeuRPalfUDCLAqDYiSz";
 
+var STORAGE_PROVIDER_URL = sails.config.cloudStorageProviders.url;
+var STORAGE_PROVIDER_LOGIN = sails.config.cloudStorageProviders.apiLogin ;
+var STORAGE_PROVIDER_KEY = sails.config.cloudStorageProviders.apiKey;
+var STORAGE_PROVIDER_CONTAINER = sails.config.cloudStorageProviders.container;
 
 
 module.exports = {
@@ -124,7 +125,7 @@ module.exports = {
         return res.json({error_text: "ERROR" + err});
       };
 
-      client.createContainer({name:"my-container", metadata: {image:'DICOM', vol:234}}, function (err, container)
+      client.createContainer({name: STORAGE_PROVIDER_CONTAINER, metadata: {image:'DICOM', vol:234}}, function (err, container)
       {
 
         res.json({Container: container});
