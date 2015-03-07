@@ -128,7 +128,7 @@ module.exports = {
 
         });
 
-        readStream.pipe(writeStream).on('error', function (err) { sails.error.log("ERROR !!!")});
+        readStream.pipe(writeStream).on('error', function (err) { sails.log.error("ERROR IN WRITING STREAM:"+err.toString())});
       }
 
     });
