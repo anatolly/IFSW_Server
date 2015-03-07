@@ -30,7 +30,7 @@ module.exports = {
 
 
     client.on('error', function (err) {
-      console.log("Cloud client error:"+err);
+      console.log("Cloud client error:"+ JSON.stringify(err,2,2));
     });
 
     return client;
@@ -80,7 +80,7 @@ module.exports = {
     client.getContainers(function(err, data) {
 
       if (err) {
-      console.log("ERROR:"+err);
+      console.log("ERROR in getContainers:"+ JSON.stringify(err,2,2));
         cb(err,null);
 
       }
@@ -92,13 +92,13 @@ module.exports = {
         writeStream.on('error', function(err)
         {
           // handle your error case
-          console.log("ERROR--------"+err);
+          console.log("ERROR in writestream:"+ JSON.stringify(err,2,2));
 
           cb(err, null);
         });
 
         readStream.on('error', function (d) {
-          console.log("ERROR in readstream:"+d);
+          console.log("ERROR in readstream:" + JSON.stringify(d,2,2));
         });
 
         writeStream.on('success', function(file)
@@ -128,7 +128,7 @@ module.exports = {
 
         });
 
-        readStream.pipe(writeStream).on('error', function (err) { sails.log.error("ERROR IN WRITING STREAM:"+err.toString())});
+        readStream.pipe(writeStream).on('error', function (err) { sails.log.error("ERROR IN PIPING STREAMS:"+ JSON.stringify(err,2,2))});
       }
 
     });
