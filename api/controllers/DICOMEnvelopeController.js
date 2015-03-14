@@ -94,7 +94,7 @@ module.exports =
     });
   },
 */
-  
+
   download: function (req, res) {
     DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
 
