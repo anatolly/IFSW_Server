@@ -11,6 +11,10 @@
 
 module.exports.http = {
 
+  key: 'INTRAFAB.CloudStorage.Sails.sid'
+
+
+
   /****************************************************************************
   *                                                                           *
   * Express middleware to use for every Sails request. To add custom          *
