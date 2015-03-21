@@ -26,13 +26,13 @@ module.exports = function () {
 
   this.When(/^I make request to test controller page with param "([^"]*)"$/, function (param_val, cb) {
     console.log('when:' + param_val);
-    this.visittest("http://localhost:1337/v1.0/TestCucumber/test?param=", param_val, cb);
+    this.visittest("/v1.0/TestCucumber/test?param=", param_val, cb);
   });
 
 
   this.When(/^I upload a valid DICOM file$/, function (cb) {
 
-    this.upload("http://localhost:1337/v1.0/DICOMEnvelope/upload",
+    this.upload("/v1.0/DICOMEnvelope/upload",
                 "/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm",
                 cb);
 
@@ -42,7 +42,7 @@ module.exports = function () {
 
     this.When(/^I make request to download a valid DICOM file with id (\d+)$/, function (param_val, cb) {
 
-      this.download("http://localhost:1337/v1.0/DICOMEnvelope/download", param_val, "RECEIVED_DICOM_FILE_FOR_ID_"+param_val+".dcm", cb);
+      this.download("/v1.0/DICOMEnvelope/download", param_val, "RECEIVED_DICOM_FILE_FOR_ID_"+param_val+".dcm", cb);
 
 
     });
@@ -77,8 +77,8 @@ module.exports = function () {
 
 
 
-    this.Then(/^Size of the downloaded file should coincide the size of the test DICOM file$/, function (cb) {
-      if (!assertFilesEqual("/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm","RECEIVED_DICOM_FILE_FOR_ID_"+ 127 +".dcm", cb)) {
+    this.Then(/^Size of the downloaded file for id (\d+) should coincide the size of the test DICOM file$/, function (file_id, cb) {
+      if (!assertFilesEqual("/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm","RECEIVED_DICOM_FILE_FOR_ID_"+ file_id +".dcm", cb)) {
         return
       }
       cb();

@@ -16,9 +16,13 @@ module.exports = function () {
     this.lastResponse = null;
 
 
-    this.visittest = function(base_url, param_val, cb) {
+//    this.SERVER_URL = "http://localhost:1337/";
+    this.SERVER_URL = "http://localhost:8080/cloudStorage-1";
 
-      var uri = base_url + param_val;
+
+    this.visittest = function(request_path, param_val, cb) {
+
+      var uri = this.SERVER_URL + request_path + param_val;
 
       request.get({url: uri, headers: {'User-Agent': 'request'}},
         function (error, response) {
@@ -33,16 +37,17 @@ module.exports = function () {
     };
 
 
-    this.upload = function(base_url, filename, cb) {
+    this.upload = function(request_path, filename, cb) {
 
       var formData = {
         dicom_file: {value: fs.createReadStream(filename), options: {filename:"DICOM FILE"}}
       };
 
+      var uri = this.SERVER_URL + request_path;
 
-      request.post({url:base_url, formData: formData, headers: {'User-Agent': 'request'} }, function(error, response, body) {
+      request.post({url:uri, formData: formData, headers: {'User-Agent': 'request'} }, function(error, response, body) {
         if (error) {
-          return cb.fail(new Error('Error on POST request to ' + base_url +
+          return cb.fail(new Error('Error on POST request to ' + uri +
           ': ' + error.message))
         }
         self.lastResponse = response;
@@ -55,9 +60,12 @@ module.exports = function () {
     };
 
 
-    this.download = function(base_url, param_val, localfilename, cb) {
-      console.log("URL USED:" + base_url+'?id='+param_val);
-      request.get(base_url+'?id='+param_val).on('response', function(response) {
+    this.download = function(request_path, param_val, localfilename, cb) {
+
+      var uri = this.SERVER_URL + request_path;
+
+      console.log("URL USED:" + uri +'?id='+param_val);
+      request.get(uri +'?id='+param_val).on('response', function(response) {
         console.log(response.statusCode) // 200
         console.log(response.headers['content-type']) // 'image/png'
         self.lastResponse = response;
