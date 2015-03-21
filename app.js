@@ -21,10 +21,12 @@
 
 /* for nodetime statistics */
 
+
 require('nodetime').profile({
-  accountKey: '28f4c5c054b3664952823ac46e0c060d84afdde1',
-  appName: 'IFSW Server 1'
+  accountKey: sails.config.nodetimeAuth.accountKey,
+  appName: sails.config.nodetimeAuth.appName
 });
+
 
 
 
