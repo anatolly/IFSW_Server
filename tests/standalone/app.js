@@ -1,5 +1,5 @@
 // Node Application for Testing Project server
-
+// For running please use command-line argument <number of requests>
 
 var request = require('request');
 var fs = require('fs');
@@ -14,7 +14,9 @@ process.chdir(__dirname);
 (function() {
 
 
-  var url = "http://localhost:1337/v1.0/DICOMEnvelope";
+  // CHANGE URL if the address of the solution is different
+  var url = "http://localhost:8080/cloudStorage-1/v1.0/DICOMEnvelope";
+
   var filename  = "../data/brain_001.dcm";
 
   var upload_url = url + "/upload";
@@ -48,7 +50,7 @@ process.chdir(__dirname);
 
   console.log("PROJECT DIR:"+__dirname);
   console.log("RUN COUNT:"+ specifiedCount);
-
+  console.log("+ means successfull upload, - means succesfull delete");
   //----------------------  MAIN CYCLE ---------   begin
   tick_start = process.hrtime();
 
@@ -100,6 +102,8 @@ for(var actors = 0; actors < specifiedCount; actors ++) {
             if (response.statusCode == 200) {
              // console.log("SUCCESS DELETE");
               sucessDeleteCount++;
+              process.stdout.write('-');
+
             }
             else {
               console.log("Error during delete.Server response:" + body);
@@ -110,7 +114,7 @@ for(var actors = 0; actors < specifiedCount; actors ++) {
           }
 
           currentCount++;
-          process.stdout.write('-');
+
 
           if (currentCount == specifiedCount) {
             //--------------------------------------------------  OUTPUT STATISTICS
