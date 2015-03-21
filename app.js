@@ -19,20 +19,26 @@
  */
 
 
-/* for nodetime statistics */
-
-
-require('nodetime').profile({
-  accountKey: sails.config.nodetimeAuth.accountKey,
-  appName: sails.config.nodetimeAuth.appName
-});
-
 
 
 
 // Ensure we're in the project directory, so relative paths work as expected
 // no matter where we actually lift from.
 process.chdir(__dirname);
+
+
+
+/* for nodetime statistics */
+ntc = require('./config/nodetimec');
+
+
+require('nodetime').profile({
+  accountKey: ntc.nodetimeAuth.accountKey,
+  appName: ntc.nodetimeAuth.appName
+});
+
+
+
 
 
 
@@ -66,6 +72,7 @@ process.chdir(__dirname);
       rc = function () { return {}; };
     }
   }
+
 
 
   // Start server
