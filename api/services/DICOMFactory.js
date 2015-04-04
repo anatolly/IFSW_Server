@@ -53,14 +53,26 @@ module.exports = {
 
     aEnvelope.unknownDICOMDictionaryAttributes = JSON.stringify(unknownDICOMDistonaryAttributes);
     aEnvelope.unknownIFSWAttributes = JSON.stringify(unknownIFSWAttributes);
-    aEnvelope.DICOMObjectID = dicomObjectID;
+
+
+ aEnvelope.DICOMObjectID = dicomObjectID;
+// use unique ID
 
     DICOMEnvelope.create(aEnvelope, function (err, aEnvelope) {
       if(err) {
         //TODO implement error handling
-        sails.log("Error during crrating ORM Envelope");
+        sails.log("Error during creating ORM Envelope");
         return;
       }
+
+      // make the second save with unique ID
+      /*aEnvelope.DICOMObjectID = aEnvelope.id ;
+      aEnvelope.save(function (err, inst){
+                      if(err) {
+                        sails.log("Error during second save of ORM");
+                        return;
+                      }
+      });*/
 
       return cb(aEnvelope);
     });

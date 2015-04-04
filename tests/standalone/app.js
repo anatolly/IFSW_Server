@@ -15,7 +15,11 @@ process.chdir(__dirname);
 
 
   // CHANGE URL if the address of the solution is different
-  var url = "http://localhost:8080/cloudStorage-1/v1.0/DICOMEnvelope";
+//  var url = "http://localhost:8080/cloudStorage/v1.0/DICOMEnvelope";
+
+  var url = "http://localhost:1337/v1.0/DICOMEnvelope";
+
+
 
   var filename  = "../data/brain_001.dcm";
 
