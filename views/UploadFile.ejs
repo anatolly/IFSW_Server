@@ -1,0 +1,13 @@
+<h2>Message from a controller <%= title %> </h2>
+
+
+<form action="/v1.0/Envelope/upload" enctype="multipart/form-data" method="post">
+		<input type="text" name="title">
+		<br>
+		<input type="file" name="dicom_file" multiple="multiple">
+		<br>
+		<input type="submit" value="Upload">
+</form>
+
+
+

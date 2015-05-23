@@ -55,7 +55,7 @@ module.exports =
 
           //          DICOMFactory.createDICOMEnvelope(foundAsLastUID.toString(), dataSet, function(aEnvelope) {
           try {
-            DICOMFactory.createDICOMEnvelope(uniqueDICOMObjectID.toString(), dataSet, function (aEnvelope) {
+            DICOMFactory.createDICOMEnvelope(uniqueDICOMObjectID.toString(), dataSet, req.session.user, function (aEnvelope) {
               try {
                 CloudAPI.uploadFile(filePath, aEnvelope.DICOMObjectID, aEnvelope, function (err, file) {
 
