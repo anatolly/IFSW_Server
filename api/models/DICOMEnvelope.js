@@ -84,7 +84,12 @@ module.exports =
 
 
     // IFSW specific data
-    DICOMObjectID: 'string'
+    DICOMObjectID: 'string',
+
+    //Authorization and Application-dependent data
+    userID:        'string',
+    applicationID: 'string'
+
   }
 };
 
