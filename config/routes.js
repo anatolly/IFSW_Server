@@ -35,9 +35,6 @@ module.exports.routes = {
   '/': {
     view: 'homepage'
   },
-  '/prettyinputview': {
-    view: 'prettyinput'
-  },
 
 
   /***************************************************************************
@@ -49,5 +46,15 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
+  '/v1.0/VDevUI': {
+    view: 'UploadFile', locals: {title:"Upload File with Authorization"}
+  },
+
+  '/v1.0/VDICOMDevUI': {
+    view: 'DICOMUploadFile', locals: {title:"Upload DICOM File"}
+  },
+  'get /v1.0/envelope/download': 'EnvelopeController.download',
+  'get /v1.0/Envelope/:id?': 'EnvelopeController.find'
+
 
 };

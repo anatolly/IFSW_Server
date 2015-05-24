@@ -28,7 +28,7 @@ module.exports =
 
     //return res.redirect("/v1.0/DICOMEnvelope");
 
-    DICOMEnvelope.find({'userID':req.session.user.toString(), 'application_ID':sails.config.ifsw.application_name }, function (err, envelopes) {
+    DICOMEnvelope.find({'userID':req.session.user.toString(), 'applicationID':sails.config.ifsw.application_name }, function (err, envelopes) {
 
       if(err) {
         return res.json({Error: 'Error during index in Envelope:' + err });
@@ -43,14 +43,35 @@ module.exports =
 
 find: function (req, res) {
 
-  DICOMEnvelope.find({'userID':req.session.user.toString(), 'id':req.param('id'), 'application_ID':sails.config.ifsw.application_name}, function (err, envelopes) {
+  var id = req.param('id');
 
-    if(err) {
-      return res.json({Error: 'Error during find in Envelope:' + err });
-    }
-    return res.json(envelopes);
+  if (id) {
+    DICOMEnvelope.findOne({'userID':req.session.user.toString(), 'id':id, 'applicationID':sails.config.ifsw.application_name}, function (err, envelope) {
 
-  });
+      if(err) {
+        return res.json({Error: 'Error during find in Envelope:' + err });
+      }
+      if (envelope === undefined) {
+        return res.notFound();
+      }
+      else {
+        return res.json(envelope);
+      }
+
+    });
+
+  }
+  else {
+    DICOMEnvelope.find({'userID':req.session.user.toString(), 'applicationID':sails.config.ifsw.application_name }, function (err, envelopes) {
+
+      if(err) {
+        return res.json({Error: 'Error during index in Envelope:' + err });
+      }
+      return res.json(envelopes);
+
+    });
+  }
+
 
 },
 
@@ -62,9 +83,7 @@ find: function (req, res) {
 
 
   download: function (req, res) {
-
     return DICOMEnvelopeController.download(req,res);
-
   },
 
   //------------------------------------------------------------------------------------------------

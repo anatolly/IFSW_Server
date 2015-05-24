@@ -107,7 +107,10 @@ module.exports = {
           // write metadata to the cloud
           // file.metadata = {test : 'aaaa'}; //JSON.stringify(metadata);
 
-          file.metadata = {studyDescription: metadata.StudyDescription,
+          // Add metadata to the cloud object, including logged userID and current application ID for uniqueness
+          // Assume metadata object is DICOMEnvelope 
+          file.metadata = { userID: metadata.userID, applicationID: metadata.applicationID,
+            studyDescription: metadata.StudyDescription,
             patientID: metadata.PatientID,
             all_1: new Buffer(JSON.stringify(metadata)).toString('base64').substr(0,250),
             all_2: new Buffer(JSON.stringify(metadata)).toString('base64').substr(251,250),
