@@ -54,7 +54,8 @@ module.exports.routes = {
     view: 'DICOMUploadFile', locals: {title:"Upload DICOM File"}
   },
   'get /v1.0/envelope/download': 'EnvelopeController.download',
-  'get /v1.0/Envelope/:id?': 'EnvelopeController.find'
+  'get /v1.0/envelope/delete': 'EnvelopeController.delete',
+  'get /v1.0/envelope/:id?': 'EnvelopeController.find'
 
 
 };
