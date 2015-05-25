@@ -10,7 +10,7 @@ module.exports = {
   /**
     @dicomRawData - dicom parser dataSet is assumed as input parameter
   */
-  createDICOMEnvelope: function(dicomObjectID, dicomRawData, cb) {
+  createDICOMEnvelope: function(dicomObjectID, dicomRawData, userID, cb) {
 
     function getTag(tag) {
       var group = tag.substring(1, 5);
@@ -23,6 +23,9 @@ module.exports = {
     aEnvelope = {};
     unknownDICOMDistonaryAttributes = {};
     unknownIFSWAttributes = {};
+
+
+
 
     for (var propertyName in dicomRawData.elements) {
       var element = dicomRawData.elements[propertyName];
@@ -57,6 +60,12 @@ module.exports = {
 
  aEnvelope.DICOMObjectID = dicomObjectID;
 // use unique ID
+
+
+    //setup aapplication ID and user ID for the Envelope
+    aEnvelope.applicationID =  sails.config.ifsw.application_name;
+    if ( ! userID ) { userID = sails.config.ifsw.default_param_userid; }
+    aEnvelope.userID = userID;
 
     DICOMEnvelope.create(aEnvelope, function (err, aEnvelope) {
       if(err) {

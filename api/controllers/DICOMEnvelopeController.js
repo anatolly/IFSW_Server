@@ -55,7 +55,7 @@ module.exports =
 
           //          DICOMFactory.createDICOMEnvelope(foundAsLastUID.toString(), dataSet, function(aEnvelope) {
           try {
-            DICOMFactory.createDICOMEnvelope(uniqueDICOMObjectID.toString(), dataSet, function (aEnvelope) {
+            DICOMFactory.createDICOMEnvelope(uniqueDICOMObjectID.toString(), dataSet, req.session.user, function (aEnvelope) {
               try {
                 CloudAPI.uploadFile(filePath, aEnvelope.DICOMObjectID, aEnvelope, function (err, file) {
 
@@ -98,6 +98,7 @@ module.exports =
 */
 
   download: function (req, res) {
+    //TODO Add userID and applicationID to the search conditions in find to restrict access
     DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
 
       if (err)
@@ -197,6 +198,7 @@ module.exports =
 
   //------------------------------------------------------------------------------------------------
   delete: function (req, res ) {
+    //TODO Add userID and applicationID to the search conditions in find to restrict access
     DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
       if (err) {
         return res.json({Error: 'Error during delete in DICOMEnvelope:' + err });
@@ -224,7 +226,7 @@ module.exports =
   //---------------------------------------------------------------------------------
   deleteHeap: function (req, res) {
     var d = new Date(req.param('y'),req.param('mo')-1,req.param('d'),req.param('h'),req.param('mi'),req.param('s'));
-
+    //TODO Add userID and applicationID to the search conditions in find to restrict access
     DICOMEnvelope.find({where:{'createdAt': {'<': d } }, limit: req.param('limit'), sort: 'createdAt ASC'}, function (err, envelopes) {
       if (err) {
         return res.json({Error: 'Error during Massive Delete HEAP in DICOMEnvelope:' + err });

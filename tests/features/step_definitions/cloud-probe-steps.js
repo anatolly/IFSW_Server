@@ -40,12 +40,40 @@ module.exports = function () {
   });
 
 
-    this.When(/^I make request to download a valid DICOM file with id (\d+)$/, function (param_val, cb) {
+  this.When(/^I upload a valid DICOM file in AUTH mode$/, function (cb) {
+
+    this.upload("/v1.0/envelope/upload",
+      "/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm",
+      cb);
+
+    // cb.pending();
+  });
+
+  this.When(/^I sign in as an appuser "([^"]*)"$/, function (param_val, cb) {
+
+    this.visittest("/v1.0/session/signin?appuser=", param_val, cb);
+
+    // cb.pending();
+  });
+
+
+  this.When(/^I make request to download a valid DICOM file with id (\d+)$/, function (param_val, cb) {
 
       this.download("/v1.0/DICOMEnvelope/download", param_val, "RECEIVED_DICOM_FILE_FOR_ID_"+param_val+".dcm", cb);
 
 
     });
+
+
+
+  this.When(/^I make AUTHENTICATED request to download a LAST uploaded DICOM file$/, function (cb) {
+
+    this.download("/v1.0/envelope/download", this.getLastUploadedId(), "RECEIVED_DICOM_FILE_FOR_ID_"+ this.getLastUploadedId() +".dcm", cb);
+
+
+  });
+
+
 
   /*------------------- THEN clauses -------------------------*/
 
@@ -75,7 +103,12 @@ module.exports = function () {
       cb();
     })
 
-
+  this.Then(/^Size of the LAST downloaded file should coincide the size of the test DICOM file$/, function (cb) {
+    if (!assertFilesEqual("/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm","RECEIVED_DICOM_FILE_FOR_ID_"+ this.getLastUploadedId() +".dcm", cb)) {
+      return
+    }
+    cb();
+  })
 
     this.Then(/^Size of the downloaded file for id (\d+) should coincide the size of the test DICOM file$/, function (file_id, cb) {
       if (!assertFilesEqual("/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm","RECEIVED_DICOM_FILE_FOR_ID_"+ file_id +".dcm", cb)) {
@@ -83,8 +116,6 @@ module.exports = function () {
       }
       cb();
     });
-
-
 
   /*==============================================================*/
   /*---------------------------- UTILITIES ------------------------*/

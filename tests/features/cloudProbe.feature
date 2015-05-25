@@ -10,6 +10,7 @@ Feature: DICOM_file_processing_check
 
 
     Scenario: test downloading DICOM
-      When I make request to download a valid DICOM file with id 550
+      When I make request to download a valid DICOM file with id 15
       Then I should see http status 200
-      And Size of the downloaded file for id 550 should coincide the size of the test DICOM file
+      And Size of the downloaded file for id 15 should coincide the size of the test DICOM file
+
