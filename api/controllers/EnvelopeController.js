@@ -6,15 +6,7 @@
  */
 
 
-//See www.stackoverflow.com/questions/28204247
-
-
-
-
-// Reference the dicomParser module
-//var dicomParser = require('.././dicomParser');
-var dicomParser = require('../../externals/dicomParser');
-var fs = require('fs');
+// See www.stackoverflow.com/questions/28204247
 
 
 var DICOMEnvelopeController = require ('./DICOMEnvelopeController');
@@ -24,11 +16,13 @@ module.exports =
 
   index: function (req, res) {
 
+    var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
 
+    // force using extra conditions to limit search
+    search_conditions.userID = req.session.user;
+    search_conditions.applicationID = sails.config.ifsw.application_name;
 
-    //return res.redirect("/v1.0/DICOMEnvelope");
-
-    DICOMEnvelope.find({'userID':req.session.user.toString(), 'applicationID':sails.config.ifsw.application_name }, function (err, envelopes) {
+    DICOMEnvelope.find(search_conditions, function (err, envelopes) {
 
       if(err) {
         return res.json({Error: 'Error during index in Envelope:' + err });
@@ -43,10 +37,18 @@ module.exports =
 
 find: function (req, res) {
 
-  var id = req.param('id');
 
-  if (id) {
-    DICOMEnvelope.findOne({'userID':req.session.user.toString(), 'id':id, 'applicationID':sails.config.ifsw.application_name}, function (err, envelope) {
+  var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
+
+  // force using extra conditions to limit search
+  search_conditions.userID = req.session.user;
+  search_conditions.applicationID = sails.config.ifsw.application_name;
+
+
+
+
+  if (search_conditions.id) {
+    DICOMEnvelope.findOne(search_conditions, function (err, envelope) {
 
       if(err) {
         return res.json({Error: 'Error during find in Envelope:' + err });
@@ -62,7 +64,7 @@ find: function (req, res) {
 
   }
   else {
-    DICOMEnvelope.find({'userID':req.session.user.toString(), 'applicationID':sails.config.ifsw.application_name }, function (err, envelopes) {
+    DICOMEnvelope.find(search_conditions, function (err, envelopes) {
 
       if(err) {
         return res.json({Error: 'Error during index in Envelope:' + err });
