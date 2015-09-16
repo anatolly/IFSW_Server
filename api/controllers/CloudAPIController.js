@@ -2,8 +2,12 @@
  * Created by ebabkin on 12/9/14.
  */
 
-var S3_HOST_ADDRESS = 'http://192.168.17.145';
+var fs = require('fs');
 
+var S3_HOST_ADDRESS = 'http://172.16.0.96:80';
+
+var S3_LOGIN="H0RB6KZUKYKQCZ7IDTC4";
+var S3_TOKEN="n0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtjgOFY";
 
 var STORAGE_PROVIDER_URL = sails.config.cloudStorageProviders.url;
 var STORAGE_PROVIDER_LOGIN = sails.config.cloudStorageProviders.apiLogin ;
@@ -21,9 +25,7 @@ module.exports = {
 
   testS3: function  (req, res) {
 
-    var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
-                                        "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-                                        S3_HOST_ADDRESS);
+    var client = CloudAPI.initS3Client( S3_LOGIN, S3_TOKEN, S3_HOST_ADDRESS);
 
 
     client.getContainers(function (err, containers) {
@@ -40,7 +42,7 @@ module.exports = {
     });
 
   },
-
+//-----------------------------------------------------------------------------------------------------------------
   test: function  (req, res) {
 
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
@@ -52,40 +54,34 @@ module.exports = {
 
         var descr =  "";
       // res.json({info: "Available" + containers.length + " containers"});
-
+      console.log("CONTAINERS SIZE=" + containers.length);
       for(var i=0; i < containers.length; i++) {
 
-      descr = containers[i].metadata.description;
-      if (descr != undefined) {
-        // current version doe snot support update. delete metadata frist
-      }
-      else
-      {
-        descr = 'Container for DICOM data';
-      }
-      containers[i].metadata.access = descr ;
-      client.updateContainerMetadata(containers[i], function (err_u, c){
-
-        if (err_u) {
-          sails.log("ERROR="+err_u);
-          return res.json({error_text: "ERROR" + err_u});
+        descr = containers[i].metadata.description;
+        if (descr != undefined) {
+          // current version doe snot support update. delete metadata frist
         }
-        res.json({Containers_AFTER: c})});
+        else {
+          descr = 'Container for DICOM data';
+        }
+        containers[i].metadata.access = descr;
 
 
-    }
+        client.updateContainerMetadata(containers[i], function (err_u, c) {
 
-
-
+          if (err_u) {
+            sails.log("ERROR=" + err_u);
+            return res.json({error_text: "ERROR" + err_u});
+          }
+        });
+      };
+        res.json({Containers_AFTER: containers});
     });
-
   },
-
+//--------------------------------------------------------------------------------------------------
   createS3: function  (req, res) {
 
-    var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
-      "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-      'http://192.168.17.145');
+    var client = CloudAPI.initS3Client( S3_LOGIN, S3_TOKEN, S3_HOST_ADDRESS);
 
 
     client.getContainers(function (err, containers) {
@@ -115,7 +111,7 @@ module.exports = {
 
   },
 
-
+//-----------------------------------------------------------------------------------------------------------------------
   create: function  (req, res) {
 
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
@@ -135,10 +131,11 @@ module.exports = {
 
   },
 
+//-----------------------------------------------------------------------------------------------------------------------
 
   downloadS3: function (req, res) {
     // create a cloud client
-    var client = CloudAPI.initS3Client("test:tester", "testing", "http://89.109.55.200:8080");
+    var client = CloudAPI.initS3Client(S3_LOGIN, S3_TOKEN, S3_HOST_ADDRESS);
 
     res.setHeader('Content-disposition', 'attachment; filename=test.dcm')
 
@@ -153,22 +150,24 @@ module.exports = {
 
 
 
+//-----------------------------------------------------------------------------------------------------------------------
 
   download: function (req, res) {
     // create a cloud client
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
-    res.setHeader('Content-disposition', 'attachment; filename=test.dcm')
+    res.setHeader('Content-disposition', 'attachment; filename=test.dat')
 
     //download a remote file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
     client.download({
       container: 'my-container',
-      remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/c32ec5c0-b111-475c-9450-bda863eaa4fa.dcm'
+      remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat'
     }).pipe(res);
   },
 
+//-----------------------------------------------------------------------------------------------------------------------
 
   pipeuploadS3_succeded: function  (req, res) {
 
@@ -177,12 +176,10 @@ module.exports = {
 
 
     // create a cloud client
-    var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
-      "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-      S3_HOST_ADDRESS);
+    var client = CloudAPI.initS3Client( S3_LOGIN, S3_TOKEN, S3_HOST_ADDRESS);
 
     //stream file to the predefined container
-    var writeStream = client.upload({ container: 'my-container11111111/', remote: 'remote-file-name.txt'});
+    var writeStream = client.upload({ container: 'my-container/', remote: 'remote-file-name.txt'});
 
     // pipe the  data directly to the cloud provide
     var readStream = req.file('dicom_file');
@@ -214,8 +211,11 @@ module.exports = {
   },
 
 
+//-----------------------------------------------------------------------------------------------------------------------
 
   pipeupload_succeded: function  (req, res) {
+
+    var filename = '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat';
 
     // as in http://stackoverflow.com/questions/24069203/skipper-in-sailsjs-beta-image-resize-before-upload
     var Writable = require('stream').Writable;
@@ -224,11 +224,20 @@ module.exports = {
     // create a cloud client
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
+    var stats = fs.statSync(filename);
+    var fileSizeInBytes = stats["size"];
+
+    console.log("FILE SIZE IS : "+ fileSizeInBytes);
+
     //stream file to the predefined container
-    var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
+    //actually parameter size is not used because we use Encoding: Chunked
+    var writeStream = client.upload({ container: 'my-container', remote:'REMOTE_FILE', size:fileSizeInBytes });
 
     // pipe the  data directly to the cloud provide
-    var readStream = req.file('dicom_file');
+    var readStream = fs.createReadStream('/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat');
+
+    readStream.pipe(writeStream);
+
 
     writeStream.on('error', function(err)
     {
@@ -250,13 +259,13 @@ module.exports = {
       cb();
     };
 
-    req.file('dicom_file').upload(receiver, function(err, files){
-      // File is now  uploaded to cloud storage
-    });
+    //req.file('dicom_file').upload(receiver, function(err, files){
+    //  // File is now  uploaded to cloud storage
+    //});
 
     },
 
-
+//---------------------------------------------------------------------------------------------------------------
   pipeupload_objectmode: function  (req, res) {
 
     var stream = require('stream');
@@ -312,17 +321,24 @@ module.exports = {
     rs.pipe(new StringifyStream()).pipe(writeStream);
   },
 
-
+//-----------------------------------------------------------------------------------------------------------
   upload: function  (req, res) {
-    req.file('dicom_file').upload(function (err, files) {
-      if (err)
-        return res.serverError(err);
+
+    var filename = '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat';
+
+  //  req.file('dicom_file').upload(function (err, files) {
+    //  if (err)
+    //    return res.serverError(err);
 
 
       var fs = require('fs');
 
-      var filePath =  files[0].fd; //   'ctimage.dcm';
+      //var filePath =  files[0].fd; //   'ctimage.dcm';
 
+      var stats = fs.statSync(filename);
+      var fileSizeInBytes = stats["size"];
+
+      console.log("FILE UPLOAD SIZE in UPLOAD METHOD:"+fileSizeInBytes);
 
       // create a cloud client
       var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
@@ -330,13 +346,14 @@ module.exports = {
       //save local file to the predefined container
      // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
-      var readStream = fs.createReadStream(filePath);
-      var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
+      var readStream = fs.createReadStream(filename);
+    //actually parameter size is not used because we use Encoding: Chunked
+      var writeStream = client.upload({ size: 0, container: 'my-container', remote: 'remote-file-name.txt'});
 
       writeStream.on('error', function(err)
       {
         // handle your error case
-        return res.json({Error: 'Error text:' + err });
+        return res.json({Error: 'Error upload text:' + err });
       });
 
       writeStream.on('success', function(file)
@@ -348,31 +365,38 @@ module.exports = {
 
       readStream.pipe(writeStream);
 
-      });
+     // });
   },
 
-
+//---------------------------------------------------------------------------------------------------------------------
   uploadS3: function  (req, res) {
-    req.file('dicom_file').upload(function (err, files) {
-      if (err)
-        return res.serverError(err);
+
+    var filename = '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat';
+
+
+  //  req.file('dicom_file').upload(function (err, files) {
+   //   if (err)
+    //    return res.serverError(err);
 
 
       var fs = require('fs');
 
-      var filePath =  files[0].fd; //   'ctimage.dcm';
+     // var filePath =  files[0].fd; //   'ctimage.dcm';
+
+    var stats = fs.statSync(filename);
+    var fileSizeInBytes = stats["size"];
+
+    console.log("FILE UPLOAD SIZE in UPLOAD METHOD:"+fileSizeInBytes);
 
 
-      // create a cloud client
-      var client = CloudAPI.initS3Client( "H0RB6KZUKYKQCZ7IDTC4",
-        "0oCODjamvzwb9CPTUtOvWJkYjLyXV9VfMtnjgOFY",
-        S3_HOST_ADDRESS);
+    // create a cloud client
+      var client = CloudAPI.initS3Client( S3_LOGIN, S3_TOKEN, S3_HOST_ADDRESS);
 
 
       //save local file to the predefined container
       // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
-      var readStream = fs.createReadStream(filePath);
+      var readStream = fs.createReadStream(filename);
       var writeStream = client.upload({ container: 'my-container', remote: 'remote-file-name.txt'});
 
       writeStream.on('error', function(err)
@@ -389,8 +413,6 @@ module.exports = {
 
 
       readStream.pipe(writeStream);
-
-    });
   }
 
 
