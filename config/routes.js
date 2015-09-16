@@ -53,11 +53,20 @@ module.exports.routes = {
   '/v1.0/VDICOMDevUI': {
     view: 'DICOMUploadFile', locals: {title:"Upload DICOM File"}
   },
+
+  'get /v1.0/session/signin': 'SessionController.signin',
+  'get /v1.0/session/signoff': 'SessionController.signout',
+
+
   'get /v1.0/envelope/download': 'EnvelopeController.download',
   'get /v1.0/envelope/delete': 'EnvelopeController.delete',
   'get /v1.0/envelope/:id?': 'EnvelopeController.find',
+
+
+
   'get /v1.0/CloudAPIController/create': 'CloudAPIController.create',
   'get /v1.0/CloudAPIController/test': 'CloudAPIController.test',
   'get /v1.0/CloudAPIController/pipeupload_succeded': 'CloudAPIController.pipeupload_succeded',
-  'get /v1.0/CloudAPIController/upload': 'CloudAPIController.upload'
+  'get /v1.0/CloudAPIController/upload': 'CloudAPIController.upload',
+  'get /v1.0/CloudAPIController/download': 'CloudAPIController.download'
 };
