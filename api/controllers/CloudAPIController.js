@@ -14,6 +14,7 @@ var STORAGE_PROVIDER_LOGIN = sails.config.cloudStorageProviders.apiLogin ;
 var STORAGE_PROVIDER_KEY = sails.config.cloudStorageProviders.apiKey;
 var STORAGE_PROVIDER_CONTAINER = sails.config.cloudStorageProviders.container;
 
+var TEST_FILENAME = "TEST_UPLOAD_FILE.dat";
 
 module.exports = {
 
@@ -144,7 +145,7 @@ module.exports = {
 
     client.download({
       container: 'my-container',
-      remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/c32ec5c0-b111-475c-9450-bda863eaa4fa.dcm'
+      remote: 'c32ec5c0-b111-475c-9450-bda863eaa4fa.dcm'
     }).pipe(res);
   },
 
@@ -156,14 +157,14 @@ module.exports = {
     // create a cloud client
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
-    res.setHeader('Content-disposition', 'attachment; filename=test.dat')
+    res.setHeader('Content-disposition', 'attachment; filename='+TEST_FILENAME);
 
     //download a remote file to the predefined container
     // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
     client.download({
       container: 'my-container',
-      remote: '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat'
+      remote: TEST_FILENAME
     }).pipe(res);
   },
 
@@ -215,8 +216,6 @@ module.exports = {
 
   pipeupload_succeded: function  (req, res) {
 
-    var filename = '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat';
-
     // as in http://stackoverflow.com/questions/24069203/skipper-in-sailsjs-beta-image-resize-before-upload
     var Writable = require('stream').Writable;
 
@@ -224,17 +223,17 @@ module.exports = {
     // create a cloud client
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
-    var stats = fs.statSync(filename);
+    var stats = fs.statSync(TEST_FILENAME);
     var fileSizeInBytes = stats["size"];
 
     console.log("FILE SIZE IS : "+ fileSizeInBytes);
 
     //stream file to the predefined container
     //actually parameter size is not used because we use Encoding: Chunked
-    var writeStream = client.upload({ container: 'my-container', remote:'REMOTE_FILE', size:fileSizeInBytes });
+    var writeStream = client.upload({ container: 'my-container', remote:'REMOTE_TEST_FILE', size:fileSizeInBytes });
 
     // pipe the  data directly to the cloud provide
-    var readStream = fs.createReadStream('/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat');
+    var readStream = fs.createReadStream(TEST_FILENAME);
 
     readStream.pipe(writeStream);
 
@@ -324,8 +323,6 @@ module.exports = {
 //-----------------------------------------------------------------------------------------------------------
   upload: function  (req, res) {
 
-    var filename = '/Users/babkin/WebstormProjects/IFSW_Server/.tmp/uploads/test.dat';
-
   //  req.file('dicom_file').upload(function (err, files) {
     //  if (err)
     //    return res.serverError(err);
@@ -335,7 +332,7 @@ module.exports = {
 
       //var filePath =  files[0].fd; //   'ctimage.dcm';
 
-      var stats = fs.statSync(filename);
+      var stats = fs.statSync(TEST_FILENAME);
       var fileSizeInBytes = stats["size"];
 
       console.log("FILE UPLOAD SIZE in UPLOAD METHOD:"+fileSizeInBytes);
@@ -346,20 +343,20 @@ module.exports = {
       //save local file to the predefined container
      // following the guidelines from https://github.com/pkgcloud/pkgcloud#storage
 
-      var readStream = fs.createReadStream(filename);
+      var readStream = fs.createReadStream(TEST_FILENAME);
     //actually parameter size is not used because we use Encoding: Chunked
-      var writeStream = client.upload({ size: 0, container: 'my-container', remote: 'remote-file-name.txt'});
+      var writeStream = client.upload({ size: 0, container: 'my-container', remote: TEST_FILENAME});
 
       writeStream.on('error', function(err)
       {
         // handle your error case
-        return res.json({Error: 'Error upload text:' + err });
+        return res.json({status:"Error", response: err });
       });
 
       writeStream.on('success', function(file)
       {
         // success, file will be a File model
-        return res.json({SUCCESS: 'File details:' + file });
+        return res.json({status:"OK", response: file } );
       });
 
 

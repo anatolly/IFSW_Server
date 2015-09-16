@@ -11,6 +11,8 @@
 
 var DICOMEnvelopeController = require ('./DICOMEnvelopeController');
 
+
+//--------------------------------------------------------------------------------------------------------------------
 module.exports =
 {
 
@@ -35,6 +37,7 @@ module.exports =
 
   },
 
+//--------------------------------------------------------------------------------------------------------------------
 find: function (req, res) {
 
 
@@ -77,27 +80,32 @@ find: function (req, res) {
 
 },
 
-
- //TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
+//--------------------------------------------------------------------------------------------------------------------
+//TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
+//TODO redesign upload method to use MIME encoding for proper type
   upload: function  (req, res) {
       return DICOMEnvelopeController.upload(req,res);
   },
 
-
+//--------------------------------------------------------------------------------------------------------------------
   download: function (req, res) {
     return DICOMEnvelopeController.download(req,res);
   },
 
-  //------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
   delete: function (req, res ) {
 
     return DICOMEnvelopeController.delete(req,res);
   },
 
-  //---------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
   deleteHeap: function (req, res) {
   return DICOMEnvelopeController.deleteHeap(req,res)
   }
 };
 
-//====================================== INTERNAL UTILITY FUNCTIONS ================================
+
+
+//--------------------------------------------------------------------------------------------------------------------
+
+//====================================== INTERNAL UTILITY FUNCTIONS ==================================================
