@@ -87,7 +87,11 @@ module.exports = {
       else {
 
         var readStream = fs.createReadStream(filepath);
-        var writeStream = client.upload({ container: STORAGE_PROVIDER_CONTAINER, remote: filename});
+        var stats = fs.statSync(filepath);
+        var fileSizeInBytes = stats["size"];
+
+        //actually parameter size is not used because we use Encoding: Chunked
+        var writeStream = client.upload({ container: STORAGE_PROVIDER_CONTAINER, remote: filename, size: 0});
 
         writeStream.on('error', function(err)
         {
@@ -108,7 +112,7 @@ module.exports = {
           // file.metadata = {test : 'aaaa'}; //JSON.stringify(metadata);
 
           // Add metadata to the cloud object, including logged userID and current application ID for uniqueness
-          // Assume metadata object is DICOMEnvelope 
+          // Assume metadata object is DICOMEnvelope
           file.metadata = { userID: metadata.userID, applicationID: metadata.applicationID,
             studyDescription: metadata.StudyDescription,
             patientID: metadata.PatientID,
