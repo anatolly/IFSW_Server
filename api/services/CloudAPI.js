@@ -5,7 +5,9 @@
 
 //var dicomFactoryDictionary = require('./DICOMFactoryDictionary');
 
-var fs = require('fs');
+var fs      = require('fs');
+var MimeDetectorStream = require('./MimeDetectorStream');
+
 
 var   AWS = require('aws-sdk');
 // var proxy = require('proxy-agent');
@@ -64,9 +66,73 @@ module.exports = {
 
   },
 
+//----------------------------------------------------------------------------------------------------------------------
+  uploadEnvelopeContent: function(read_stream, aEnvelope, cb) {
 
 
+    // create a cloud client
+    var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
 
+
+    // first, check availability of the CloudProvider and presence of needed container
+    client.getContainers(function(err, data) {
+        if (err) {
+          console.log("ERROR of uploadEnvelopeContent in getContainers:"+ JSON.stringify(err,null,2));
+          cb(err,null);
+
+        }
+        else if (neededContainerExists(data)) {
+
+          //actually parameter size is not used because we use Encoding: Chunked
+          var writeStream = client.upload({ container: STORAGE_PROVIDER_CONTAINER, remote: aEnvelope.ObjectID, size: 0});
+
+
+          // register event handlers for input and output streams
+          writeStream.on('error', function(err)
+          {
+            console.log("ERROR in writestream:"+ JSON.stringify(err,null,2));
+            cb(err, null);
+          });
+
+          read_stream.on('error', function (d) {
+            console.log("ERROR in readstream:" + JSON.stringify(d, null, 2));
+            cb(err, null);
+          });
+
+          // create MimeDetector Transform Stream
+          var mime = MimeDetectorStream();
+
+
+          mime.on('error', function(err){console.log("ERROR IN MIME:"+err)});
+
+          // define processing logic for the end of streaming
+          writeStream.on('finish', function (stream) {
+            console.log("RES IN END:" + mime.getMimeType());
+
+            //update envelope
+            aEnvelope.MimeType = mime.getMimeType();
+            cb(null,aEnvelope);
+
+            // Add metadata to the cloud object, including logged userID and current application ID for uniqueness
+            // Assume metadata object is Envelope
+          //  stream.metadata = aEnvelope.toJSON();
+          //  client.updateFileMetadata(stream.container, stream, cb );
+          });
+
+          //pipe them together
+          read_stream.pipe(mime).pipe(writeStream);
+
+        }
+        else {
+          console.log("ERROR of uploadEnvelopeContent in getContainers: No Needed Container : "+ STORAGE_PROVIDER_CONTAINER);
+          cb({"error":'no container'},null);
+        }
+
+    });
+
+  },
+
+//----------------------------------------------------------------------------------------------------------------------
 
   uploadFile: function (filepath, filename, metadata, cb) {
 
@@ -179,5 +245,22 @@ module.exports = {
 
   }
 
-
 };
+//--------------------------------------------------------------------------------------------------------------------
+
+//====================================== INTERNAL UTILITY FUNCTIONS ==================================================
+function neededContainerExists(containersList)
+{
+  for(var i=0; i < containersList.length; i++) {
+
+    if (containersList[i].name == STORAGE_PROVIDER_CONTAINER ) return true;
+  }
+
+return false;
+
+
+  }
+
+
+
+//--------------------------------------------------------------------------------------------------------------------

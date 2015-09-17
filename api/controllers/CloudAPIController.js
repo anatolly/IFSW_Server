@@ -4,6 +4,11 @@
 
 var fs = require('fs');
 
+
+var mmm = require('mmmagic'), Magic = mmm.Magic;
+var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+
+
 var S3_HOST_ADDRESS = 'http://172.16.0.96:80';
 
 var S3_LOGIN="H0RB6KZUKYKQCZ7IDTC4";

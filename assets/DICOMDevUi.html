@@ -16,6 +16,19 @@
 </form>
 
 <br>
+
+<h1> GENERIC FILE UPLOAD FORM</h1>
+<h3> Local path</h3>
+<form action="/v1.0/Envelope/upload" enctype="multipart/form-data" method="post">
+  <input type="text" name="title">
+  <br>
+  <input type="file" name="new_content" multiple="multiple">
+  <br>
+  <input type="submit" value="Upload">
+</form>
+
+<br>
+
 <h3> Remote  path</h3>
 <form action="/cloudStorage/v1.0/DICOMEnvelope/upload" enctype="multipart/form-data" method="post">
   <input type="text" name="title">
