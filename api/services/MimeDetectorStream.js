@@ -39,6 +39,7 @@ function MimeDetectorStream(options) {
   Transform.call(this, options);
 
   this.processed = false;
+  this.mime_known = false;
   this.digestedsize = 0;
   this.digestedbuffer = new Buffer(1024);
   this.magic = new Magic(mmm.MAGIC_MIME_TYPE);
@@ -58,22 +59,28 @@ MimeDetectorStream.prototype._transform = function (chunk, enc, cb) {
 
   var stream = this;
 
-  //  this.digestedbuffer = Buffer.concat([this.digestedbuffer,buffer]);
+  this.digestedbuffer = Buffer.concat([buffer], 512);
+
+
+
 
   this.digestedsize += chunk.length;
 
   if(! this.processed ) {
     this.processed = true;
-    this.magic.detect(buffer, function (err, result) {
-      if (err) throw err;
+    this.mime_known = false;
+    this.magic.detect(this.digestedbuffer, function (err, result) {
+      if (err) {sails.log.error("MimeDetectorStream", "ERROR  during detection"); throw err;}
       stream.mime_type = result;
-      console.log("RES IN TRANSFORM:"+result);
-
-      stream.push(chunk);
-      cb();
+      sails.log.debug("MimeDetectorStream", "Mime Type In Trasform Stream:", result);
+      stream.mime_known = true;
 
     });
   }
+
+  stream.push(chunk);
+  cb();
+
 
 };
 
@@ -98,8 +105,8 @@ MimeDetectorStream.prototype._flush = function (cb) {
 
   }
 
-  console.log("we digested:" + this.digestedsize + "b bytes.");
-  console.log("mime type discovered:"+this.mime_type);
+  sails.log.debug("MimeDetectorStream", "we digested:",this.digestedsize, "b bytes.");
+  sails.log.debug("MimeDetectorStream", "mime type discovered:", this.mime_type);
   cb();
 };
 

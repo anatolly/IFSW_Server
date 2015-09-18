@@ -25,8 +25,8 @@ module.exports =
     // MIME type detected
     MimeType: 'string',
 
-    // Is metadata of the object is extracted
-    metadataExtracted: 'boolean',
+    // Is mime-dependent deep semantics of the object extracted ?
+    isSemanticsExtracted: { type: "boolean", defaultsTo: false},
 
 
     //Authorization and Application-dependent data

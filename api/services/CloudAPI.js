@@ -7,7 +7,7 @@
 
 var fs      = require('fs');
 var MimeDetectorStream = require('./MimeDetectorStream');
-
+var Writable = require('stream').Writable;
 
 var   AWS = require('aws-sdk');
 // var proxy = require('proxy-agent');
@@ -32,7 +32,7 @@ module.exports = {
 
 
     client.on('error', function (err) {
-      console.log("Cloud client error:"+ JSON.stringify(err,null,2));
+      sails.log.error("CloudAPI", "Cloud client error:", JSON.stringify(err,null,2));
     });
 
     return client;
@@ -67,7 +67,7 @@ module.exports = {
   },
 
 //----------------------------------------------------------------------------------------------------------------------
-  uploadEnvelopeContent: function(read_stream, aEnvelope, cb) {
+  uploadEnvelopeContent: function(read_stream, aEnvelope, cb1) {
 
 
     // create a cloud client
@@ -77,7 +77,7 @@ module.exports = {
     // first, check availability of the CloudProvider and presence of needed container
     client.getContainers(function(err, data) {
         if (err) {
-          console.log("ERROR of uploadEnvelopeContent in getContainers:"+ JSON.stringify(err,null,2));
+          sails.log.error("CloudAPI", "ERROR of uploadEnvelopeContent in getContainers:", JSON.stringify(err,null,2));
           cb(err,null);
 
         }
@@ -90,41 +90,88 @@ module.exports = {
           // register event handlers for input and output streams
           writeStream.on('error', function(err)
           {
-            console.log("ERROR in writestream:"+ JSON.stringify(err,null,2));
-            cb(err, null);
+            sails.log.error("CloudAPI"," ERROR in writestream:", JSON.stringify(err,null,2));
+            cb1(err, null);
           });
 
           read_stream.on('error', function (d) {
-            console.log("ERROR in readstream:" + JSON.stringify(d, null, 2));
-            cb(err, null);
+            sails.log.error("CloudAPI", "ERROR in readstream:", JSON.stringify(d, null, 2));
+            cb1(err, null);
           });
 
           // create MimeDetector Transform Stream
-          var mime = MimeDetectorStream();
+          var mime = MimeDetectorStream({highWaterMark:512});
 
 
-          mime.on('error', function(err){console.log("ERROR IN MIME:"+err)});
+          // mime.on('error', function(err){console.log("ERROR IN MIME:"+err)});
 
           // define processing logic for the end of streaming
-          writeStream.on('finish', function (stream) {
-            console.log("RES IN END:" + mime.getMimeType());
+          // success, file will be a pkgCloud File model
+          // so, we can write metadata to the cloud
+          writeStream.on('success', function (fileModel) {
+            if(mime.mime_known)
+            {
+              sails.log.debug("CloudAPI", "Mime IN Success:" + mime.getMimeType());
+              //update envelope
+              aEnvelope.MimeType = mime.getMimeType();
 
-            //update envelope
-            aEnvelope.MimeType = mime.getMimeType();
-            cb(null,aEnvelope);
+              // Add metadata to the cloud object, including logged userID and current application ID for uniqueness
+              // Assume metadata object is Envelope
 
-            // Add metadata to the cloud object, including logged userID and current application ID for uniqueness
-            // Assume metadata object is Envelope
-          //  stream.metadata = aEnvelope.toJSON();
-          //  client.updateFileMetadata(stream.container, stream, cb );
+              //file.metadata = { userID: metadata.userID, applicationID: metadata.applicationID,
+              //  studyDescription: metadata.StudyDescription,
+              //  patientID: metadata.PatientID
+              //};
+              fileModel.metadata = aEnvelope.toJSON();
+              client.updateFileMetadata(fileModel.container, fileModel, cb1 );
+            }
+            else
+            {
+
+              // wait until next 500 ms and check
+              var count = 0;
+              var intervalId = setInterval( function() {
+                if (mime.mime_known)
+                {
+                  clearInterval(intervalId);
+                  aEnvelope.MimeType = mime.getMimeType();
+                  //cb1(null,aEnvelope);
+                  fileModel.metadata = aEnvelope.toJSON();
+                  client.updateFileMetadata(fileModel.container, fileModel, cb1 );
+                }
+
+                if (count > 3) {
+                  clearInterval(intervalId);
+                  sails.log.debug("CloudAPI","MIME IS STill Unknown");
+                  fileModel.metadata = aEnvelope.toJSON;
+                  client.updateFileMetadata(fileModel.container, fileModel, cb1 );
+                  // cb1(null,aEnvelope);
+                }
+                count++;
+
+              }, 500);
+            }
           });
 
-          //pipe them together
-          read_stream.pipe(mime).pipe(writeStream);
+
+         //  mime.pipe(writeStream);
+
+          // Let's create a custom receiver
+          var receiver = new Writable({objectMode: true});
+          receiver._write = function(skiper_stream, enc, cb) {
+
+            //pipe the streams together
+            skiper_stream.pipe(mime).pipe(writeStream);
+            cb();
+          };
+
+          read_stream.upload(receiver, function(err, files){
+            // Too early - that is just end of the sequence
+          });
 
         }
         else {
-          console.log("ERROR of uploadEnvelopeContent in getContainers: No Needed Container : "+ STORAGE_PROVIDER_CONTAINER);
+          sails.log.error("CloudAPI", "ERROR of uploadEnvelopeContent in getContainers: No Needed Container : ", STORAGE_PROVIDER_CONTAINER);
           cb({"error":'no container'},null);
         }
 
@@ -133,7 +180,7 @@ module.exports = {
   },
 
 //----------------------------------------------------------------------------------------------------------------------
-
+// @Depricated
   uploadFile: function (filepath, filename, metadata, cb) {
 
     // create a cloud client
@@ -207,7 +254,7 @@ module.exports = {
     });
 
   },
-
+//-----------------------------------------------------------------------------------------------------------------------
   downloadFile: function ( filename, cb) {
 
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL ); //http://89.109.55.200:8080");

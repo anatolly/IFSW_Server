@@ -97,7 +97,8 @@ find: function (req, res) {
   upload: function  (req, res) {
 
     // pipe the  data of multipart body (file)
-    var readStream = fs.createReadStream(TEST_FILENAME); //fs. req.file(UPLOADED_CONTENT_PARAM_NAME);
+    //fs.createReadStream(TEST_FILENAME); //fs.
+    var readStream =  req.file(UPLOADED_CONTENT_PARAM_NAME);
 
     // generate ObjectID
     var uniqueObjectID = CommonTools.createUUID();
@@ -116,35 +117,56 @@ find: function (req, res) {
         uniqueObjectID = CommonTools.createUUID();
       }
 
+      //TODO MERGE with the code below
+      /*
+
+
+       // Let's create a custom receiver
+       var receiver = new Writable({objectMode: true});
+       receiver._write = function(file, enc, cb) {
+       file.pipe(writeStream);
+       cb();
+       };
+
+
+
+       req.file('dicom_file').upload(receiver, function(err, files){
+       // File is now  uploaded to cloud storage
+       });
+
+
+       */
+
+
+
       try {
           EnvelopeFactory.createEnvelope(uniqueObjectID.toString(), req.session.user, function (aEnvelope) {
           try {
-            CloudAPI.uploadEnvelopeContent(readStream, aEnvelope, function (err, updatedEnvelope) {
+            CloudAPI.uploadEnvelopeContent(readStream, aEnvelope, function (err, fileModel) {
 
               if (err) {
 
-                sails.log.error('Cloud API Error :' + err);
+                sails.log.error("EnvelopeController", 'Cloud API Error :', err);
                 return res.json({Error: 'Error text:' + err});
               }
 
-              sails.log("FILE UPLOADED:" + JSON.stringify(updatedEnvelope));
-          //    sails.log("FILE UPLOADED METADATA:" + JSON.stringify(file.metadata));
+              sails.log.debug("EnvelopeController", "FILE UPLOADED:",  JSON.stringify(fileModel.metadata));
+
               res.statusCode = 200;
               return res.json({
                 message: 'File uploaded successfully!',
-                files: updatedEnvelope,
-                envelope: updatedEnvelope
+                envelope: fileModel.metadata
               });
             })
           }
           catch (e) {
-            console.log("Exception during upload file" + e);
+            sails.log.error("EnvelopeController", "Exception during upload file:", e);
             //TODO send HTTP error code and a reason
           }
         });
       }
       catch (e) {
-        sails.error.log("Exception during evelope"+e);
+        sails.error.log("EnvelopeController", "Exception during evelope", e);
       //TODO send HTTP error code and a reason
       };
 
