@@ -19,81 +19,78 @@
 //---------------- CONSTANTS DEFINITIONS -----------------------------------------------------------------  end  -----
 
 
-var DICOMEnvelopeController = require ('./DICOMEnvelopeController');
-var TEST_FILENAME = "TEST_UPLOAD_FILE.dat";
-
 
 //--------------------------------------------------------------------------------------------------------------------
 module.exports =
 {
+
+//-------Original methods ---------------------------------------------------------------------------------- begin  --
+//--------------------------------------------------------------------------------------------------------------------
 
   index: function (req, res) {
 
     var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
 
     // force using extra conditions to limit search
-    search_conditions.userID = req.session.user;
+    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
     search_conditions.applicationID = sails.config.ifsw.application_name;
 
-    DICOMEnvelope.find(search_conditions, function (err, envelopes) {
+    Envelope.find(search_conditions, function (err, envelopes) {
 
       if(err) {
+        sails.log.error("EnvelopeController", "index", "Error during find:", err);
+
         return res.json({Error: 'Error during index in Envelope:' + err });
       }
       return res.json(envelopes);
 
     });
-
-
 
   },
 
+
 //--------------------------------------------------------------------------------------------------------------------
-find: function (req, res) {
+  find: function (req, res) {
+
+    var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
+
+    // force using extra conditions to limit search
+    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
+    search_conditions.applicationID = sails.config.ifsw.application_name;
+
+    if (search_conditions.id) {
+      Envelope.findOne(search_conditions, function (err, envelope) {
+
+        if(err) {
+          sails.log.error("EnvelopeController", "find", "Error during find:", err);
+
+          return res.json({Error: 'Error during find in Envelope:' + err });
+        }
+        if (envelope === undefined) {
+          return res.notFound();
+        }
+        else {
+          return res.json(envelope);
+        }
+
+      });
+
+    }
+    else {
+      Envelope.find(search_conditions, function (err, envelopes) {
+
+        if (err) {
+          sails.log.error("EnvelopeController", "find", "Error during Index:", err);
+          return res.json({Error: 'Error during index in Envelope:' + err});
+        }
+        return res.json(envelopes);
+
+      });
+    }
+  },
 
 
-  var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
-
-  // force using extra conditions to limit search
-  search_conditions.userID = req.session.user;
-  search_conditions.applicationID = sails.config.ifsw.application_name;
-
-
-
-
-  if (search_conditions.id) {
-    DICOMEnvelope.findOne(search_conditions, function (err, envelope) {
-
-      if(err) {
-        return res.json({Error: 'Error during find in Envelope:' + err });
-      }
-      if (envelope === undefined) {
-        return res.notFound();
-      }
-      else {
-        return res.json(envelope);
-      }
-
-    });
-
-  }
-  else {
-    DICOMEnvelope.find(search_conditions, function (err, envelopes) {
-
-      if(err) {
-        return res.json({Error: 'Error during index in Envelope:' + err });
-      }
-      return res.json(envelopes);
-
-    });
-  }
-
-
-},
-
-//-------Original methods ---------------------------------------------------------------------------------- begin  --
-// TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
-//TODO redesign upload method to use MIME encoding for proper type
+//--------------------------------------------------------------------------------------------------------------------
   upload: function  (req, res) {
 
     // pipe the  data of multipart body (file)
@@ -117,32 +114,11 @@ find: function (req, res) {
         uniqueObjectID = CommonTools.createUUID();
       }
 
-      //TODO MERGE with the code below
-      /*
-
-
-       // Let's create a custom receiver
-       var receiver = new Writable({objectMode: true});
-       receiver._write = function(file, enc, cb) {
-       file.pipe(writeStream);
-       cb();
-       };
-
-
-
-       req.file('dicom_file').upload(receiver, function(err, files){
-       // File is now  uploaded to cloud storage
-       });
-
-
-       */
-
-
-
       try {
-          EnvelopeFactory.createEnvelope(uniqueObjectID.toString(), req.session.user, function (aEnvelope) {
+          var basicEnvelope = EnvelopeFactory.createEnvelope(uniqueObjectID.toString(), req.session.user);
           try {
-            CloudAPI.uploadEnvelopeContent(readStream, aEnvelope, function (err, fileModel) {
+
+            CloudAPI.uploadEnvelopeContent(readStream, basicEnvelope , function (err, fileModel) {
 
               if (err) {
 
@@ -152,10 +128,27 @@ find: function (req, res) {
 
               sails.log.debug("EnvelopeController", "FILE UPLOADED:",  JSON.stringify(fileModel.metadata));
 
-              res.statusCode = 200;
-              return res.json({
-                message: 'File uploaded successfully!',
-                envelope: fileModel.metadata
+
+              // TODO Save Envelope
+              Envelope.create(fileModel.metadata, function (err, newEnvelope) {
+                if(err) {
+                  //TODO implement error handling
+                  sails.log.error("EnvelopeController","upload", "Error during creating ORM Generic Envelope");
+                  res.statusCode = 500;
+                  return res.json({
+                    message: 'File uploaded successfully, but ORM operation failed.',
+                    error: err,
+                    envelope: fileModel.metadata
+                  });
+                }
+                else
+                {
+                  res.statusCode = 200;
+                  return res.json({
+                    message: 'File uploaded successfully.',
+                    envelope: fileModel.metadata
+                  });
+                }
               });
             })
           }
@@ -163,7 +156,6 @@ find: function (req, res) {
             sails.log.error("EnvelopeController", "Exception during upload file:", e);
             //TODO send HTTP error code and a reason
           }
-        });
       }
       catch (e) {
         sails.error.log("EnvelopeController", "Exception during evelope", e);
@@ -174,42 +166,140 @@ find: function (req, res) {
 
   },
 
+//--------------------------------------------------------------------------------------------------------------------
+  download: function (req, res) {
 
+    var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
+
+    // force using extra conditions to limit search
+    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
+    search_conditions.applicationID = sails.config.ifsw.application_name;
+
+    Envelope.findOne(search_conditions, function (err, envelope) {
+
+      if (err)
+      {
+        sails.log.error("EnvelopeController", "download", "Error during find:", err);
+        res.statusCode = 500;
+        return res.json({Error: 'Error during findOne:' + err });
+      }
+      else {
+        if (envelope != null) {
+
+          sails.log.debug("EnvelopeController", "download", "ENVELOPE ID = ", envelope.id);
+          sails.log.debug("EnvelopeController", "download","OBJECT ID:", envelope.DICOMObjectID);
+
+          var ostream = CloudAPI.downloadFile(envelope.ObjectID);
+
+          ostream.pause();
+          ostream.on('error', function (resp) {
+            sails.log.error("EnvelopeController", "download", "Error in output stream:", resp);
+            return res.send(500, "Download Error");
+          });
+
+          ostream.once('data', function (data_chunk) {
+            sails.log.debug("EnvelopeController", "download", "ONCE Data event");
+            var first_resp = data_chunk.toString();
+            if (first_resp == "NoSuchKey") {
+              sails.log.error("EnvelopeController", "download", "ERROR: No such key response from cloud storage");
+              ostream.end();
+              return res.send(404, "No such File");
+
+            } else {
+              res.contentType(envelope.MimeType);
+              res.set("Content-Disposition", "attachment; filename=IFSW_Object_ID_" + envelope.id + ".object");
+              res.write(data_chunk);
+              ostream.pipe(res);
+              ostream.resume();
+            }
+          });
+
+          ostream.on('response', function (resp) {
+            sails.log.debug("EnvelopeController", "download", "ON Response event", resp);
+            return res.send(404, "No such file");
+          });
+        }
+        else {
+          sails.log.error("EnvelopeController", "download", 'Envelope was not found. Search conditions:', search_conditions);
+          res.statusCode = 404;
+          return res.send("Envelope was not found. 404 error" );
+        }
+      }
+    });
+  },
+
+//--------------------------------------------------------------------------------------------------------------------
+  delete: function (req, res ) {
+
+    var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
+
+    sails.log.debug("SEARCH_CONDITIONS",search_conditions);
+    sails.log.debug("SEARCH_CONDITIONS",search_conditions.length);
+
+    if (Object.keys(search_conditions).length === 0) {
+      sails.log.debug("EnvelopeController", "delete", "ERROR: Empty filter conditions");
+      res.statusCode = 400;
+      return res.json("ERROR: Filter conditions are missed.");
+    }
+
+
+    // force using extra conditions to limit search
+    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
+    search_conditions.applicationID = sails.config.ifsw.application_name;
+
+
+    Envelope.findOne(search_conditions, function (err, envelope) {
+      if (err) {
+        sails.log.error("EnvelopeController", "delete", "Error during find:", err);
+        return res.json({Error: 'Error during delete in Envelope:' + err });
+      }
+      else {
+        if (envelope != null) {
+          _deleteObjectFromStorage(envelope, function (result) {
+            if(result != null){
+              res.statusCode = result.statusCode;
+              return res.json(result.result);
+            }
+          } );
+        }
+        else {
+          sails.log.error("EnvelopeController", "delete", 'Envelope was not found. Search conditions:', search_conditions);
+          res.statusCode = 404;
+          return res.send("Envelope was not found. 404 error" );
+        }
+      }
+
+
+    });
+  }
 
 //-------Original methods ---------------------------------------------------------------------------------- end    --
-
-
-//-------Stubs of the methods ------------------------------------------------------------------------------ begin  --
-//--------------------------------------------------------------------------------------------------------------------
-//TODO redesign upload method to avoid saving the local file (parse it as a stream ! )
-//TODO redesign upload method to use MIME encoding for proper type
-  _upload: function  (req, res) {
-      return DICOMEnvelopeController.upload(req,res);
-  },
-
-//--------------------------------------------------------------------------------------------------------------------
-  _download: function (req, res) {
-    return DICOMEnvelopeController.download(req,res);
-  },
-
-//--------------------------------------------------------------------------------------------------------------------
-  _delete: function (req, res ) {
-
-    return DICOMEnvelopeController.delete(req,res);
-  },
-
-//--------------------------------------------------------------------------------------------------------------------
-  _deleteHeap: function (req, res) {
-  return DICOMEnvelopeController.deleteHeap(req,res)
-  }
-//-------Stubs of the methods ------------------------------------------------------------------------------ end    --
-
-
 };
-
 
 
 //--------------------------------------------------------------------------------------------------------------------
 
 //====================================== INTERNAL UTILITY FUNCTIONS ==================================================
+
+function _deleteObjectFromStorage (envelope, cb) {
+  CloudAPI.deletefile(envelope.ObjectID, function (err, result) {
+    if (err) {
+      sails.log.error("EnvelopeController","delete", 'Error during delete the object from the cloud. Error:', err);
+      cb({statusCode: 500, result: "Envelope ID:" + envelope.id +" Error deleting object from cloud: " + err });
+    }
+    else {
+
+      Envelope.destroy(envelope.id).exec(function (err) {
+        if (err) {
+          sails.log.error("EnvelopeController","delete", "Error delete of ORM isntance with id:", envelope.id);
+          cb({statusCode: 500, result: "Failure: delete ORM instance:" + err });
+        }
+        else {
+          sails.log.debug("EnvelopeController","delete", "delete sucessfull with id:", envelope.id);
+          cb({statusCode: 200, result: "Sucess: delete file "});
+        }
+      }); //destroy ORM instance
+    }
+  });
+}
 

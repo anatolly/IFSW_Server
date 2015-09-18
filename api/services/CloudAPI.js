@@ -122,7 +122,7 @@ module.exports = {
               //  studyDescription: metadata.StudyDescription,
               //  patientID: metadata.PatientID
               //};
-              fileModel.metadata = aEnvelope.toJSON();
+              fileModel.metadata = aEnvelope;
               client.updateFileMetadata(fileModel.container, fileModel, cb1 );
             }
             else
@@ -136,14 +136,14 @@ module.exports = {
                   clearInterval(intervalId);
                   aEnvelope.MimeType = mime.getMimeType();
                   //cb1(null,aEnvelope);
-                  fileModel.metadata = aEnvelope.toJSON();
+                  fileModel.metadata = aEnvelope;
                   client.updateFileMetadata(fileModel.container, fileModel, cb1 );
                 }
 
                 if (count > 3) {
                   clearInterval(intervalId);
                   sails.log.debug("CloudAPI","MIME IS STill Unknown");
-                  fileModel.metadata = aEnvelope.toJSON;
+                  fileModel.metadata = aEnvelope;
                   client.updateFileMetadata(fileModel.container, fileModel, cb1 );
                   // cb1(null,aEnvelope);
                 }

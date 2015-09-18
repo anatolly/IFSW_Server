@@ -7,10 +7,8 @@ require('./DICOMFactoryDictionary');
 
 module.exports = {
 
-  /**
-    @dicomRawData - dicom parser dataSet is assumed as input parameter
-  */
-  createEnvelope: function(objectID, userID, cb) {
+
+  createEnvelope: function(objectID, userID) {
 
 
     aEnvelope = {};
@@ -23,16 +21,9 @@ module.exports = {
     aEnvelope.applicationID =  sails.config.ifsw.application_name;
     if ( ! userID ) { userID = sails.config.ifsw.default_param_userid; }
     aEnvelope.userID = userID;
+    aEnvelope.isSemanticsExtracted = false;
 
-    Envelope.create(aEnvelope, function (err, aEnvelope) {
-      if(err) {
-        //TODO implement error handling
-        sails.log("Error during creating ORM Generic Envelope");
-        return;
-      }
-
-      return cb(aEnvelope);
-    });
+    return aEnvelope;
   }
 
 };

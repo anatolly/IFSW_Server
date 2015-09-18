@@ -60,6 +60,7 @@ module.exports.routes = {
 
   'get /v1.0/envelope/download': 'EnvelopeController.download',
   'get /v1.0/envelope/delete': 'EnvelopeController.delete',
+  'get /v1.0/envelope/find': 'EnvelopeController.find',
   'get /v1.0/envelope/:id?': 'EnvelopeController.find',
 
 
