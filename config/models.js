@@ -17,8 +17,8 @@ module.exports.models = {
   * connections (see `config/connections.js`)                                *
   *                                                                          *
   ***************************************************************************/
-  // connection: 'localDiskDb',
-connection: 'IFSWMysqlServer',
+  connection: 'localDiskDb',
+  // connection: 'IFSWMysqlServer',
   /***************************************************************************
   *                                                                          *
   * How and whether Sails will attempt to automatically rebuild the          *
@@ -27,6 +27,6 @@ connection: 'IFSWMysqlServer',
   * See http://sailsjs.org/#/documentation/concepts/ORM/model-settings.html  *
   *                                                                          *
   ***************************************************************************/
-   migrate: 'drop'
+   migrate: 'alter'
 
 };
