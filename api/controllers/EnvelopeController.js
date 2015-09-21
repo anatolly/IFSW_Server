@@ -146,7 +146,7 @@ module.exports =
                   res.statusCode = 200;
                   return res.json({
                     message: 'File uploaded successfully.',
-                    envelope: fileModel.metadata
+                    envelope: newEnvelope
                   });
                 }
               });
