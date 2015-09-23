@@ -62,8 +62,9 @@ module.exports.routes = {
   'get /v1.0/envelope/delete': 'EnvelopeController.delete',
   'get /v1.0/envelope/find': 'EnvelopeController.find',
   'get /v1.0/envelope/:id?': 'EnvelopeController.find',
+  'get /v1.0/envelope/:id/valet': 'ValetKeyController.generateValet',
 
-
+  'get /v1.0/valetkey/:token': 'ValetKeyController.uploadObjectByValet',
 
   'get /v1.0/CloudAPIController/create': 'CloudAPIController.create',
   'get /v1.0/CloudAPIController/test': 'CloudAPIController.test',

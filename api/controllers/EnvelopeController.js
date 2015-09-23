@@ -143,7 +143,13 @@ module.exports =
                 }
                 else
                 {
-                  res.statusCode = 200;
+
+                  // it works -- return res.redirect("../../envelope/"+ newEnvelope.id.toString());
+
+                  res.statusCode = 201;
+//                  res.location(req.protocol + '://' + req.get('host')+ '/../../envelope/' + newEnvelope.id.toString());
+                  res.location( '/../' + newEnvelope.id.toString());
+
                   return res.json({
                     message: 'File uploaded successfully.',
                     envelope: newEnvelope
@@ -251,6 +257,7 @@ module.exports =
     Envelope.findOne(search_conditions, function (err, envelope) {
       if (err) {
         sails.log.error("EnvelopeController", "delete", "Error during find:", err);
+        res.statusCode = 500;
         return res.json({Error: 'Error during delete in Envelope:' + err });
       }
       else {

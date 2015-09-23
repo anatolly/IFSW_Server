@@ -22,7 +22,7 @@ module.exports = {
     var uuid = s.join("");
     return uuid;
   },
-
+//-----------------------------------------------------------------------------------------------------------------
   simpleObjectClone: function(obj) {
     var result = {};
     Object.keys(obj).forEach(function(key){
