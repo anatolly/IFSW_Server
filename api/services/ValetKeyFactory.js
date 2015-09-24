@@ -3,9 +3,11 @@
  */
 
 const DEFAULT_TOKENSIZE = 32;
+const TOKEN_IS_VALID_STATUS = 200;
 
 module.exports = {
 
+  TOKEN_IS_VALID_STATUS: TOKEN_IS_VALID_STATUS,
 
 //--------------------------------------------------------------------------------------------------------------------
   createValetKeyFor: function (envelope, lease_time_in_minutes, cb) {

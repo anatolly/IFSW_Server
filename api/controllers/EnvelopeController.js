@@ -193,7 +193,7 @@ module.exports =
         if (envelope != null) {
 
           sails.log.debug("EnvelopeController", "download", "ENVELOPE ID = ", envelope.id);
-          sails.log.debug("EnvelopeController", "download","OBJECT ID:", envelope.DICOMObjectID);
+          sails.log.debug("EnvelopeController", "download","OBJECT ID:", envelope.ObjectID);
 
           var ostream = CloudAPI.downloadFile(envelope.ObjectID);
 

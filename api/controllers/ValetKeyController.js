@@ -36,10 +36,17 @@ module.exports =
       // return res.json({success:"200", reason:"OK", myid:req.params['id'], token:new_token});
 
       // DONE 1) check presence of Envelope with such id
-      Envelope.findOne({id:req.params['id']}, function (err, envelope) {
+
+      // force using extra conditions to limit search
+      var search_conditions = {id:req.params['id'],
+      userID:(req.session.user )?req.session.user:sails.config.ifsw.default_param_userid,
+      applicationID:sails.config.ifsw.application_name};
+
+      Envelope.findOne(search_conditions, function (err, envelope) {
         if (!err) {
           if (envelope != null) {
 
+            sails.log.debug("ValetKeyController",'generateValet', "Envelope:", envelope);
 
             // DONE 2) Determine lease time in minutes
             var lease_time_in_minutes = DEFAULT_LEASING_TIME_IN_MINUTES;
@@ -69,13 +76,13 @@ module.exports =
             });
           }
           else {
-            sails.log.error("ValetKeyController", "requestValetKey", 'requested Envelope was not found. Search conditions:id =', req.params['id']);
+            sails.log.error("ValetKeyController", "requestValetKey", 'requested Envelope was not found. Search conditions:', search_conditions);
             res.statusCode = 404;
             return res.send("Requested object does not exist. 404 error");
           }
         }
         else {
-          sails.log.error("ValetKeyController", "requestValetKey", 'Error in find Envelope. Search conditions:', req.params);
+          sails.log.error("ValetKeyController", "requestValetKey", 'Error in find Envelope. Search conditions:', search_conditions);
           res.statusCode = 500;
           return res.send("Generic 500 Error");
         }
@@ -88,16 +95,95 @@ module.exports =
     sails.log.debug("REQUEST:", req.params)
     if (! req.params['token'])
     {
-      sails.log.debug("ValetKeyController", "uploadObjectByValet", " parameters:", req.params);
+      sails.log.error("ValetKeyController", "uploadObjectByValet", " no nedeed parameter token. Available:", req.params);
       res.statusCode=500;
       return res.json({error:"500", reason:"No needed parameters"});
     }
     else {
-      // TODO 1) check validity of the token (token, lease time)
+      // 1) check existance of the single instance of the valet key
+      ValetKey.find({token:req.params['token']}).populate('refersTo').exec(function(err, vkeys) {
+        if(err) {
+          sails.log.error("ValetKeyController", "uploadObjectByValet", " DB Error in find:", err);
+          res.statusCode=500;
+          return res.json({error:"500", reason:"Storage Error"});
+        }
+        else {
+          if(vkeys.length == 0) {
+            sails.log.error("ValetKeyController", "uploadObjectByValet", " Token Not found");
+            res.statusCode=404;
+            return res.json({error:"404", reason:"token not found"});
+          }
+          else {
+            if(vkeys.length > 1) {
+              sails.log.error("ValetKeyController", "uploadObjectByValet", " Token exists in several instances:",vkeys.length);
+              // http://httpstatus.es/409
+              res.statusCode=409;
+              return res.json({error:"409", reason:"Conflict is detected"});
 
 
-      // TODO 2) ....
-      return res.json({ok:"200", data:req.params['token']});
+            } else {
+              // a single instance of the valetkey was found
+              // 2) check a proper type of vkeys[0]
+
+              try { // vkeys[0] instanceof ValetKey
+
+                var vkey = new ValetKey._model(vkeys[0]);
+
+                // 3) Check logical validity of the key (state, access count, lease time, etc)
+                var status = vkey.checkValidity();
+
+                if (status === ValetKey.VALID_STATUS ) {
+                  // access may be granted
+                  // 4) Register the key access event and save in ORM
+                  vkey.registerAccessEvent();
+
+                  vkey.save(function(err, vk){
+                    if (err) {
+                      sails.log.error("ValetKeyController", "uploadObjectByValet", " DB Error in save:", err);
+                      res.statusCode=500;
+                      return res.json({error:"500", reason:"Storage Error II"});
+                    } else {
+                      // ---------------------- delivery of the content to the client -------------- begin ----
+                      // 5) Prepair needed headers
+                      setupHeaders(res, vkeys[0]);
+
+                      // 6) initiate streaming of the object based on the reffered envelope
+                      var envelope = vkey.refersTo;
+                      if (envelope != null)
+                      {
+                          initiateStreamingFor(envelope, res);
+                      }
+                      else
+                      {
+                        sails.log.error("ValetKeyController", "uploadObjectByValet", " Envelope for known ValetKey is null or invalid");
+                        res.statusCode=500;
+                        return res.json({error:"500", reason:"Generic Storage Error III"});
+                      }
+                      // ---------------------- delivery of the content to the client -------------- end   ----
+                    }
+                  });
+                }
+                else {
+                // key access is rejected
+                  sails.log.error("ValetKeyController", "uploadObjectByValet", " Access to Valet Key is rejected");
+                  return res.json({error: status.toString(), reason:"Access is rejected"});
+                }
+
+              }
+              catch (e) {
+              // vkeys[0] is of improper type or another error
+                sails.log.error("ValetKeyController", "uploadObjectByValet", " Exception was raised:",e);
+                res.statusCode=500;
+                return res.json({error:"500", reason:"Improper type of the keys or another error."});
+              }
+            }
+          }
+
+        }
+      });
+
+
+     // return res.json({ok:"200", data:req.params['token']});
     }
   }
 
@@ -113,3 +199,68 @@ function getURLFor(request, valetKey) {
   var url = "https://" + request.get('host') + DEFAULT_PATHNAME + "?token=" + valetKey.token;
   return url;
 }
+//--------------------------------------------------------------------------------------------------------------------
+function setupHeaders(response, valetKey)
+{
+  // --- setup Content-Type from the reffered envelope
+  response.setHeader("Content-Type", valetKey.refersTo.MimeType);
+
+  // TODO --- setup Size
+ // response.res.setHeader("Content-length", valetKey.refersTo.ContentSize);
+
+  //  --- setup No-Cache
+  // see http://stackoverflow.com/questions/866822/why-both-no-cache-and-no-store-should-be-used-in-http-response
+  // see http://cristian.sulea.net/blog/disable-browser-caching-with-meta-html-tags/
+  response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  response.setHeader("Pragma", "no-cache");
+  response.setHeader("Expires", "0");
+
+
+}
+//--------------------------------------------------------------------------------------------------------------------
+function initiateStreamingFor(envelope, response)
+{
+  var res = response;
+
+  sails.log.debug("ValetKeyController", "uploadObjectByValet", "initiateStreaming for envelope id:", envelope.id);
+  sails.log.debug("ValetKeyController", "uploadObjectByValet", "initiateStreaming for ObjectID:", envelope.ObjectID);
+
+  var ostream = CloudAPI.downloadFile(envelope.ObjectID);
+
+  ostream.pause();
+  ostream.on('error', function (resp) {
+    sails.log.error("ValetKeyController", "uploadObjectByValet", "initiateStreaming", "Error in output stream:", resp);
+    res.statusCode=500;
+    return res.send(500, "Object Download Error");
+  });
+
+  ostream.once('data', function (data_chunk) {
+    sails.log.debug("ValetKeyController", "uploadObjectByValet", "initiateStreaming", "ONCE Data event");
+    var first_resp = data_chunk.toString();
+    if (ClodStorageSignalNotFound(first_resp)) {
+      sails.log.error("ValetKeyController", "uploadObjectByValet", "initiateStreaming", "ERROR: No such key response from cloud storage");
+      ostream.end();
+      res.statusCode=404;
+      return res.send(404, "No such Object in Storage");
+
+    } else {
+      res.set("Content-Disposition", "attachment; filename=IFSW_Object_ID_" + envelope.id + ".object");
+      res.write(data_chunk);
+      ostream.pipe(res);
+      ostream.resume();
+    }
+  });
+
+  ostream.on('response', function (resp) {
+    sails.log.debug("ValetKeyController", "uploadObjectByValet", "initiateStreaming", "ON Response event:", resp);
+    // return res.send(404, "No such file");
+  });
+
+//--------------------------------------------------------------------------------------------------------------------
+
+  function ClodStorageSignalNotFound(response)
+  {
+     return (response == '{"Code":"NoSuchKey"}');
+  }
+}
+
