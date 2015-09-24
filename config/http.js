@@ -11,7 +11,7 @@
 
 module.exports.http = {
 
-  key: 'INTRAFAB.CloudStorage.Sails.sid'
+  key: 'INTRAFAB.CloudStorage.Sails.sid',
 
 
 
@@ -25,7 +25,7 @@ module.exports.http = {
   *                                                                           *
   ****************************************************************************/
 
-  // middleware: {
+   middleware: {
 
   /***************************************************************************
   *                                                                          *
@@ -34,29 +34,38 @@ module.exports.http = {
   *                                                                          *
   ***************************************************************************/
 
-    // order: [
-    //   'startRequestTimer',
-    //   'cookieParser',
-    //   'session',
-    //   'myRequestLogger',
-    //   'bodyParser',
-    //   'handleBodyParserError',
-    //   'compress',
-    //   'methodOverride',
-    //   'poweredBy',
-    //   '$custom',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    //   '404',
-    //   '500'
-    // ],
+
+
+     order: [
+       'startRequestTimer',
+       'cookieParser',
+       'session',
+ //      'myRequestLogger',
+       'bodyParser',
+       'handleBodyParserError',
+       'compress',
+       'methodOverride',
+//       'poweredBy',
+       'disablePoweredBy',
+       '$custom',
+       'router',
+       'www',
+       'favicon',
+       '404',
+       '500'
+     ],
 
   /****************************************************************************
   *                                                                           *
   * Example custom middleware; logs each request to the console.              *
   *                                                                           *
   ****************************************************************************/
+  disablePoweredBy: function(request, response, next) {
+    var expressApp = sails.hooks.http.app;
+   // expressApp.disable('X-Powered-By');
+   response.set('X-Powered-By', '');
+    next();
+  }
 
     // myRequestLogger: function (req, res, next) {
     //     console.log("Requested :: ", req.method, req.url);
@@ -75,7 +84,7 @@ module.exports.http = {
 
     // bodyParser: require('skipper')
 
-  // },
+   }
 
   /***************************************************************************
   *                                                                          *
