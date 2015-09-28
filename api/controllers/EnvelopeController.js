@@ -32,8 +32,8 @@ module.exports =
     var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
 
     // force using extra conditions to limit search
-    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
-    search_conditions.applicationID = sails.config.ifsw.application_name;
+    //search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
+    //search_conditions.applicationID = sails.config.ifsw.application_name;
 
     Envelope.find(search_conditions, function (err, envelopes) {
 
@@ -55,8 +55,8 @@ module.exports =
     var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
 
     // force using extra conditions to limit search
-    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
-    search_conditions.applicationID = sails.config.ifsw.application_name;
+    //search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
+    //search_conditions.applicationID = sails.config.ifsw.application_name;
 
     if (search_conditions.id) {
       Envelope.findOne(search_conditions, function (err, envelope) {
@@ -115,7 +115,7 @@ module.exports =
       }
 
       try {
-          var basicEnvelope = EnvelopeFactory.createEnvelope(uniqueObjectID.toString(), req.session.user);
+          var basicEnvelope = EnvelopeFactory.createEnvelope(uniqueObjectID.toString(), req.session.user, req.session.application);
           try {
 
             CloudAPI.uploadEnvelopeContent(readStream, basicEnvelope , function (err, fileModel) {
@@ -129,10 +129,10 @@ module.exports =
               sails.log.debug("EnvelopeController", "FILE UPLOADED:",  JSON.stringify(fileModel.metadata));
 
 
-              // TODO Save Envelope
+              // Save Envelope
               Envelope.create(fileModel.metadata, function (err, newEnvelope) {
                 if(err) {
-                  //TODO implement error handling
+                  // implement error handling
                   sails.log.error("EnvelopeController","upload", "Error during creating ORM Generic Envelope");
                   res.statusCode = 500;
                   return res.json({
@@ -177,10 +177,6 @@ module.exports =
 
     var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
 
-    // force using extra conditions to limit search
-    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
-    search_conditions.applicationID = sails.config.ifsw.application_name;
-
     Envelope.findOne(search_conditions, function (err, envelope) {
 
       if (err)
@@ -212,8 +208,33 @@ module.exports =
               return res.send(404, "No such File");
 
             } else {
-              res.contentType(envelope.MimeType);
-              res.set("Content-Disposition", "attachment; filename=IFSW_Object_ID_" + envelope.id + ".object");
+
+              var name = envelope.filename;
+
+               if (name === 'unknown') {
+                 name = "IFSW_Object_ID_" + envelope.id + ".object";
+               }
+
+              if(envelope.MimeType != null) {
+                res.contentType(envelope.MimeType);
+              }
+              else
+              {
+                res.set("Content-Type", envelope.claimedMimeType);
+              }
+              res.set('Content-Length',envelope.size);
+
+
+/*
+              if (envelope.filename == 'unknown') {
+                filename = "IFSW_Object_ID_" + envelope.id + ".object";
+              }
+              else
+              {
+                filename = envelope.filename;
+              }
+*/
+              res.set("Content-Disposition", "attachment; filename=" + name);
               res.write(data_chunk);
               ostream.pipe(res);
               ostream.resume();
@@ -250,8 +271,8 @@ module.exports =
 
 
     // force using extra conditions to limit search
-    search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
-    search_conditions.applicationID = sails.config.ifsw.application_name;
+  //  search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
+  //  search_conditions.applicationID = sails.config.ifsw.application_name;
 
 
     Envelope.findOne(search_conditions, function (err, envelope) {

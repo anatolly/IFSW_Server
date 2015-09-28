@@ -69,6 +69,9 @@ module.exports = {
 //----------------------------------------------------------------------------------------------------------------------
   uploadEnvelopeContent: function(read_stream, aEnvelope, cb1) {
 
+    var filenameFromClient;
+    var sizefileFromClient;
+    var mimeFromClient;
 
     // create a cloud client
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
@@ -114,6 +117,10 @@ module.exports = {
               sails.log.debug("CloudAPI", "Mime IN Success:" + mime.getMimeType());
               //update envelope
               aEnvelope.MimeType = mime.getMimeType();
+              aEnvelope.size = mime.getSize();
+              aEnvelope.filename = filenameFromClient;
+              aEnvelope.claimedMimeType = mimeFromClient;
+              aEnvelope.claimedSize = sizefileFromClient;
 
               // Add metadata to the cloud object, including logged userID and current application ID for uniqueness
               // Assume metadata object is Envelope
@@ -135,6 +142,11 @@ module.exports = {
                 {
                   clearInterval(intervalId);
                   aEnvelope.MimeType = mime.getMimeType();
+                  aEnvelope.size = mime.getSize();
+                  aEnvelope.filename = filenameFromClient;
+                  aEnvelope.claimedMimeType = mimeFromClient;
+                  aEnvelope.claimedSize = sizefileFromClient;
+
                   //cb1(null,aEnvelope);
                   fileModel.metadata = aEnvelope;
                   client.updateFileMetadata(fileModel.container, fileModel, cb1 );
@@ -142,7 +154,7 @@ module.exports = {
 
                 if (count > 3) {
                   clearInterval(intervalId);
-                  sails.log.debug("CloudAPI","MIME IS STill Unknown");
+                  sails.log.debug("CloudAPI","MIME Is Still Unknown");
                   fileModel.metadata = aEnvelope;
                   client.updateFileMetadata(fileModel.container, fileModel, cb1 );
                   // cb1(null,aEnvelope);
@@ -167,6 +179,11 @@ module.exports = {
 
           read_stream.upload(receiver, function(err, files){
             // Too early - that is just end of the sequence
+            filenameFromClient = files[0].filename;
+            sails.log.debug("CloudAPI","uploadEnvelopeContent","filenameFromClient:",filenameFromClient);
+            sizefileFromClient = files[0].size;
+            mimeFromClient = files[0].type;
+
           });
 
         }

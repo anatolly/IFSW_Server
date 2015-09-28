@@ -86,9 +86,16 @@ MimeDetectorStream.prototype._transform = function (chunk, enc, cb) {
 
 
 //---------------------------------------------------------------------------------------------------
-/* at the end, flush */
+
 MimeDetectorStream.prototype.getMimeType = function () {
   return this.mime_type;
+};
+
+
+//---------------------------------------------------------------------------------------------------
+
+MimeDetectorStream.prototype.getSize = function () {
+  return this.digestedsize;
 };
 
 

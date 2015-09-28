@@ -25,6 +25,12 @@ module.exports =
     // assume the user is authenticated here
     req.session.user = req.param(sails.config.ifsw.req_param_userid);
     req.session.authenticated = true;
+
+    // check presence of application
+    if(req.param(sails.config.ifsw.req_param_applicationid)) {
+      req.session.application = req.param(sails.config.ifsw.req_param_applicationid);
+    }
+
     return res.ok();
   }
   else {

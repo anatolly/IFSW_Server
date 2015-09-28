@@ -47,6 +47,7 @@ module.exports.http = {
        'methodOverride',
 //       'poweredBy',
        'disablePoweredBy',
+       'setUserIDApplicationID',
        '$custom',
        'router',
        'www',
@@ -55,18 +56,39 @@ module.exports.http = {
        '500'
      ],
 
-  /****************************************************************************
-  *                                                                           *
-  * Example custom middleware; logs each request to the console.              *
-  *                                                                           *
-  ****************************************************************************/
+    /****************************************************************************
+     *                                                                           *
+     * IFSW middleware which removes contents of X-powered-By: header            *
+     *                                                                           *
+     ****************************************************************************/
   disablePoweredBy: function(request, response, next) {
     var expressApp = sails.hooks.http.app;
    // expressApp.disable('X-Powered-By');
    response.set('X-Powered-By', '');
     next();
-  }
+  },
 
+    /****************************************************************************
+     *                                                                           *
+     * IFSW middleware which adds to request userID and applicationName            *
+     *                                                                           *
+     ****************************************************************************/
+    setUserIDApplicationID: function(request, response, next) {
+      // force using extra conditions
+      request.userID = (request.session.user )?request.session.user:sails.config.ifsw.default_param_userid;
+      request.applicationID = (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
+      sails.log.debug("MIDDLEWARE","setUser..","applicationID:",sails.config.ifsw.default_param_applicationid);
+      next();
+    }
+
+
+
+
+    /****************************************************************************
+     *                                                                           *
+     * Example custom middleware; logs each request to the console.              *
+     *                                                                           *
+     ****************************************************************************/
     // myRequestLogger: function (req, res, next) {
     //     console.log("Requested :: ", req.method, req.url);
     //     return next();
