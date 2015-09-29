@@ -11,8 +11,7 @@
 
 //---------------- CONSTANTS DEFINITIONS ----------------------------------------------------------------- begin -----
 
-  const DEFAULT_LEASING_TIME_IN_MINUTES = 60 * 24;
-  const DEFAULT_PATHNAME = "/valet";
+  const DEFAULT_PATHNAME = "/v1.0"+"/valetkey";
 
 //---------------- CONSTANTS DEFINITIONS -----------------------------------------------------------------  end  -----
 
@@ -24,8 +23,6 @@ module.exports =
 
 //--------------------------------------------------------------------------------------------------------------------
   generateValet: function (req, res) {
-
-    sails.log.debug("REQUEST:", req.params)
     if (! req.params['id'])
     {
       res.statusCode=500;
@@ -33,26 +30,23 @@ module.exports =
       }
     else
     {
-      // return res.json({success:"200", reason:"OK", myid:req.params['id'], token:new_token});
-
       // DONE 1) check presence of Envelope with such id
+      var search_conditions = {id:req.params['id']};
 
-      // force using extra conditions to limit search
-      var search_conditions = {id:req.params['id'],
-      userID:(req.session.user )?req.session.user:sails.config.ifsw.default_param_userid,
-      applicationID:sails.config.ifsw.application_name};
-
-      Envelope.findOne(search_conditions, function (err, envelope) {
+      Envelope.findOne().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec(function (err, envelope) {
         if (!err) {
           if (envelope != null) {
 
             sails.log.debug("ValetKeyController",'generateValet', "Envelope:", envelope);
 
             // DONE 2) Determine lease time in minutes
-            var lease_time_in_minutes = DEFAULT_LEASING_TIME_IN_MINUTES;
+
+            var lease_time_in_minutes = (req.query[sails.config.ifsw.req_param_valetKey_lease]) || ValetKey.DEFAULT_LEASE_MINUTES;
+            var max_count = (req.query[sails.config.ifsw.req_param_valetKey_maxcount]) || ValetKey.DEFAULT_MAX_ACCESS_COUNT;
+
 
             // DONE 3) create an unique valet key
-            ValetKeyFactory.createValetKeyFor(envelope, lease_time_in_minutes, function (errKey, valetKey) {
+            ValetKeyFactory.createValetKeyFor(envelope, lease_time_in_minutes, max_count, function (errKey, valetKey) {
 
               if ((!errKey) && (valetKey != null)) {
 
@@ -196,7 +190,7 @@ module.exports =
 
 function getURLFor(request, valetKey) {
 
-  var url = "https://" + request.get('host') + DEFAULT_PATHNAME + "?token=" + valetKey.token;
+  var url = "http://" + request.get('host') + DEFAULT_PATHNAME + "/" + valetKey.token;
   return url;
 }
 //--------------------------------------------------------------------------------------------------------------------
@@ -243,8 +237,10 @@ function initiateStreamingFor(envelope, response)
       res.statusCode=404;
       return res.send(404, "No such Object in Storage");
 
-    } else {
-      res.set("Content-Disposition", "attachment; filename=IFSW_Object_ID_" + envelope.id + ".object");
+    } else {  // succesfull finish of preparatory tasks - start to download the object as a stream
+      var filename = envelope.filename || ("IFSW_Object.object");
+      res.statusCode = 200;
+      res.set("Content-Disposition", "attachment; filename=" + filename);
       res.write(data_chunk);
       ostream.pipe(res);
       ostream.resume();

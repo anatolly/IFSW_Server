@@ -10,12 +10,16 @@ module.exports = {
   TOKEN_IS_VALID_STATUS: TOKEN_IS_VALID_STATUS,
 
 //--------------------------------------------------------------------------------------------------------------------
-  createValetKeyFor: function (envelope, lease_time_in_minutes, cb) {
+  createValetKeyFor: function (envelope, lease_time_in_minutes, max_access_count, cb) {
 
     var new_token = createToken(DEFAULT_TOKENSIZE);
     var issuemoment = new Date(Date.now());
 
-    ValetKey.create( {issueTime: issuemoment, leaseMinutes:lease_time_in_minutes, token:new_token, refersTo: envelope} , cb);
+    ValetKey.create( { issueTime: issuemoment,
+                       leaseMinutes:lease_time_in_minutes,
+                       accessCountMax:max_access_count,
+                       token:new_token,
+                       refersTo: envelope} , cb);
 
   }
 };

@@ -7,14 +7,21 @@
 
 const ALLOWED_STATES =  ['issued', 'accessed', 'rejected'];
 
-const VALID_STATUS =200;
+const VALID_STATUS = 200;
 
-const INVALID_STATUS =403;
+const INVALID_STATUS = 403;
+
+const DEFAULT_MAX_ACCESS_COUNT = 9999999;
+
+const DEFAULT_LEASE_MINUTES = 60 * 24;
 
 module.exports =
 {
+  VALID_STATUS:             VALID_STATUS,
+  INVALID_STATUS:           INVALID_STATUS,
+  DEFAULT_MAX_ACCESS_COUNT: DEFAULT_MAX_ACCESS_COUNT,
+  DEFAULT_LEASE_MINUTES:    DEFAULT_LEASE_MINUTES,
 
-VALID_STATUS: VALID_STATUS,
 
   attributes:
   {
@@ -22,8 +29,8 @@ VALID_STATUS: VALID_STATUS,
     issueTime:  "datetime",
     lastAccessTime: "datetime",
     accessCount: {type:"integer", min:0,defaultsTo:0, required: true},
-    accessCountMax: {type:"integer", min:1, defaultsTo:555, required: true},
-    leaseMinutes: {type:"integer", min:0},
+    accessCountMax: {type:"integer", min:1, defaultsTo:DEFAULT_MAX_ACCESS_COUNT, required: true},
+    leaseMinutes: {type:"integer", min:0, defaultsTo:DEFAULT_LEASE_MINUTES, required: true},
     token: {type: "string", required: true},
     refersTo:{ model: 'Envelope', required: true },
 
@@ -56,7 +63,13 @@ VALID_STATUS: VALID_STATUS,
 
         }
       }
-      return decision;
+
+      if((decision == INVALID_STATUS) && (this.state != ALLOWED_STATES[2]))
+      { //persistently update state the ValetKey to REJECTED
+        this.state = ALLOWED_STATES[2];
+        this.save(function (){ });
+      }
+        return decision;
     },
 
     //-----------------------------------------------------------------------------------------------------------------

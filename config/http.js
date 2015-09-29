@@ -37,6 +37,7 @@ module.exports.http = {
 
 
      order: [
+
        'startRequestTimer',
        'cookieParser',
        'session',
@@ -44,11 +45,12 @@ module.exports.http = {
        'bodyParser',
        'handleBodyParserError',
        'compress',
+
        'methodOverride',
 //       'poweredBy',
        'disablePoweredBy',
-       'setUserIDApplicationID',
        '$custom',
+//       'setUserIDApplicationID',
        'router',
        'www',
        'favicon',
@@ -66,20 +68,20 @@ module.exports.http = {
    // expressApp.disable('X-Powered-By');
    response.set('X-Powered-By', '');
     next();
-  },
+  }
 
     /****************************************************************************
      *                                                                           *
      * IFSW middleware which adds to request userID and applicationName            *
      *                                                                           *
      ****************************************************************************/
-    setUserIDApplicationID: function(request, response, next) {
-      // force using extra conditions
-      request.userID = (request.session.user )?request.session.user:sails.config.ifsw.default_param_userid;
-      request.applicationID = (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
-      sails.log.debug("MIDDLEWARE","setUser..","applicationID:",sails.config.ifsw.default_param_applicationid);
-      next();
-    }
+    // setUserIDApplicationID: function(request, response, next) {
+    // force using extra conditions
+    // request.headers['X-userID'] = (request.session.user )?request.session.user:sails.config.ifsw.default_param_userid;
+    // request.headers['X-applicationID']= (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
+    // sails.log.debug("MIDDLEWARE","setUser..","applicationID:",sails.config.ifsw.default_param_applicationid);
+    // next();
+    // }
 
 
 

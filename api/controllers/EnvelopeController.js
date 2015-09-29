@@ -35,7 +35,7 @@ module.exports =
     //search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
     //search_conditions.applicationID = sails.config.ifsw.application_name;
 
-    Envelope.find(search_conditions, function (err, envelopes) {
+    Envelope.find().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec(function (err, envelopes) {
 
       if(err) {
         sails.log.error("EnvelopeController", "index", "Error during find:", err);
@@ -59,7 +59,7 @@ module.exports =
     //search_conditions.applicationID = sails.config.ifsw.application_name;
 
     if (search_conditions.id) {
-      Envelope.findOne(search_conditions, function (err, envelope) {
+      Envelope.findOne().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec(function (err, envelope) {
 
         if(err) {
           sails.log.error("EnvelopeController", "find", "Error during find:", err);
@@ -77,7 +77,7 @@ module.exports =
 
     }
     else {
-      Envelope.find(search_conditions, function (err, envelopes) {
+      Envelope.find().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec(function (err, envelopes) {
 
         if (err) {
           sails.log.error("EnvelopeController", "find", "Error during Index:", err);
@@ -177,7 +177,7 @@ module.exports =
 
     var search_conditions = CommonTools.cloneSailsReqParams(req, 'all');
 
-    Envelope.findOne(search_conditions, function (err, envelope) {
+    Envelope.findOne().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec(function (err, envelope) {
 
       if (err)
       {
@@ -269,13 +269,7 @@ module.exports =
       return res.json("ERROR: Filter conditions are missed.");
     }
 
-
-    // force using extra conditions to limit search
-  //  search_conditions.userID = (req.session.user )?req.session.user:sails.config.ifsw.default_param_userid;
-  //  search_conditions.applicationID = sails.config.ifsw.application_name;
-
-
-    Envelope.findOne(search_conditions, function (err, envelope) {
+    Envelope.findOne().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec( function (err, envelope) {
       if (err) {
         sails.log.error("EnvelopeController", "delete", "Error during find:", err);
         res.statusCode = 500;
