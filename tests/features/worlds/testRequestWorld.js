@@ -66,7 +66,7 @@ module.exports = function () {
     this.upload = function(request_path, filename, cb) {
 
       var formData = {
-        dicom_file: {value: fs.createReadStream(filename), options: {filename:"DICOM FILE"}}
+        new_content: {value: fs.createReadStream(filename), options: {filename:"DICOM FILE"}}
       };
 
       var uri = this.SERVER_URL + request_path;
@@ -77,13 +77,13 @@ module.exports = function () {
           ': ' + error.message))
         }
         self.lastResponse = response;
-        console.log("BODY IS:"+ response.body);
+        console.log("Upload", "BODY IS:", response.body);
 
         var str = response.body;
         var id_str = str.match(/\"id\"\: \d+/g);
         if (id_str) {
           lastMessage =  JSON.parse('{'+ id_str + '}');
-          console.log("LAST UPLOADED ID:" + self.getLastUploadedId() );
+          console.log("upload", "LAST UPLOADED ID:", self.getLastUploadedId() );
         }
 
 
@@ -94,13 +94,30 @@ module.exports = function () {
 
 
     };
+    //--------------------------------------------------------------------------------------------------------------------
+
+     this.delete = function(request_path, envelopeid, cb) {
+
+     var uri = this.SERVER_URL + request_path;
+
+     console.log("URL USED:" + uri +'/'+ envelopeid);
+
+     request.get({url:uri +'/'+ envelopeid, headers: {'User-Agent': 'request', 'cookie':auth_cookie }},  function (error, response)  {
+     console.log("delete", "response code:",response.statusCode) // 200
+     console.log("delete", "response headers:", response.headers)
+     self.lastResponse = response;
+     cb();
+     });
+
+     };
 
 
+//-----------------------------------------------------------------------------------
     this.download = function(request_path, param_val, localfilename, cb) {
 
       var uri = this.SERVER_URL + request_path;
 
-      console.log("URL USED:" + uri +'?id='+param_val);
+      console.log("download", "URL USED:", uri +'?id='+param_val);
 
       request.get({url:uri +'?id='+param_val, headers: {'User-Agent': 'request', 'cookie':auth_cookie }}).on('response', function(response) {
         console.log(response.statusCode) // 200

@@ -15,10 +15,10 @@ module.exports = function () {
 
   /*------------------- GIVEN clauses -------------------------*/
 
-//  this.Given(/^I am on test cucumber site$/, function (cb) {
-//    console.log('given');
-//    this.visithome('', cb);
-//  });
+this.Given(/^I am unauthenticated user$/, function (cb) {
+    console.log("AAAAAA");
+    this.visittest('/v1.0/session/signoff','',  cb);
+  });
 
   /*------------------- WHEN clauses -------------------------*/
 
@@ -32,7 +32,7 @@ module.exports = function () {
 
   this.When(/^I upload a valid DICOM file$/, function (cb) {
 
-    this.upload("/v1.0/DICOMEnvelope/upload",
+    this.upload("/v1.0/envelope/upload",
                 "/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm",
                 cb);
 
@@ -40,7 +40,7 @@ module.exports = function () {
   });
 
 
-  this.When(/^I upload a valid DICOM file in AUTH mode$/, function (cb) {
+  this.When(/^I upload a valid DICOM file$/, function (cb) {
 
     this.upload("/v1.0/envelope/upload",
       "/Users/babkin/WebstormProjects/IFSW_Server/tests/data/brain_001.dcm",
@@ -59,21 +59,22 @@ module.exports = function () {
 
   this.When(/^I make request to download a valid DICOM file with id (\d+)$/, function (param_val, cb) {
 
-      this.download("/v1.0/DICOMEnvelope/download", param_val, "RECEIVED_DICOM_FILE_FOR_ID_"+param_val+".dcm", cb);
-
-
+      this.download("/v1.0/envelope/download", param_val, "RECEIVED_DICOM_FILE_FOR_ID_"+param_val+".dcm", cb);
     });
 
 
 
-  this.When(/^I make AUTHENTICATED request to download a LAST uploaded DICOM file$/, function (cb) {
+  this.When(/^I make AUTHENTICATED request to download a LAST uploaded file$/, function (cb) {
 
     this.download("/v1.0/envelope/download", this.getLastUploadedId(), "RECEIVED_DICOM_FILE_FOR_ID_"+ this.getLastUploadedId() +".dcm", cb);
-
-
   });
 
 
+
+   this.When(/^I make AUTHENTICATED request to delete a LAST uploaded file$/, function (cb) {
+
+   this.delete("/v1.0/envelope/delete", this.getLastUploadedId(), cb);
+   });
 
   /*------------------- THEN clauses -------------------------*/
 
