@@ -99,7 +99,7 @@ module.exports = {
 
           read_stream.on('error', function (d) {
             sails.log.error("CloudAPI", "ERROR in readstream:", JSON.stringify(d, null, 2));
-            cb1(err, null);
+            cb1({error:d}, null);
           });
 
           // create MimeDetector Transform Stream
@@ -179,10 +179,17 @@ module.exports = {
 
           read_stream.upload(receiver, function(err, files){
             // Too early - that is just end of the sequence
-            filenameFromClient = files[0].filename;
-            sails.log.debug("CloudAPI","uploadEnvelopeContent","filenameFromClient:",filenameFromClient);
-            sizefileFromClient = files[0].size;
-            mimeFromClient = files[0].type;
+
+            if (!err) {
+              filenameFromClient = files[0].filename;
+              sails.log.debug("CloudAPI", "uploadEnvelopeContent", "filenameFromClient:", filenameFromClient);
+              sizefileFromClient = files[0].size;
+              mimeFromClient = files[0].type;
+            }
+            else {
+              sails.log.error("CloudAPI", "upload event", "error:", err);
+              cb1({error:err}, null);
+            }
 
           });
 

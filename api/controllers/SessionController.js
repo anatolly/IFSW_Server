@@ -39,6 +39,7 @@ module.exports =
 } else {return res.forbidden()}
   },
 
+  //----------------------------------------------------------------------------------------------------------------
   signout: function (req, res) {
 
     var user = req.session.user;
@@ -51,18 +52,6 @@ module.exports =
       return res.ok();
     }
   }
-
-  /*
-   find: function (req, res) {
-   DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
-
-   return res.json({
-   envelopes: JSON.stringify(envelopes)
-   });
-
-   });
-   },
-   */
 
 //====================================== INTERNAL UTILITY FUNCTIONS ================================
 
