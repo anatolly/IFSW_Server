@@ -45,3 +45,11 @@ Feature: Shared links (ValetKeys) to get temporary access to the specific file
     Then I should see http status 200
     And Size of the LAST downloaded file should coincide the size of the test DICOM file
 
+  Scenario: test authentication
+   #Given I am on test cucumber site
+    When I sign in as an appuser "aaa@aaa"
+    Then I should see http status 200
+
+  Scenario: test authenticated delete of the file
+    When I make AUTHENTICATED request to delete a LAST uploaded file
+    Then I should see http status 200

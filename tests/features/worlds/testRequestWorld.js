@@ -90,17 +90,25 @@ module.exports = function () {
           console.log("visitVKUssue", "STATUS:", response.statusCode);
 
 
-          var str = response.body;
-          var v_str = str.match(/\"valetKeyURL\"\: \"\[^\"]+\"/g);
+          if(response.statusCode == 200)
+          {
+            var str = response.body;
+            var v_str = str.match(/\"valetKeyURL\"\: \".+\"/g);
 
-          if (v_str) {
-            lastValetURL =  JSON.parse('{'+ v_str + '}');
-            console.log("visitVKIssue", "LAST UPLOADED ValetURL:", self.getLastKnownVKUrl() );
+            if (v_str) {
+              lastValetURL =  JSON.parse('{'+ v_str + '}');
+              console.log("visitVKIssue", "LAST UPLOADED ValetURL:", self.getLastKnownVKUrl() );
+            }
+            else{
+              console.log("visitVKIssue","no match in str", "parse:", str);
+              lastValetURL =  JSON.parse(str);
+              console.log("visitVKIssue", "LAST UPLOADED ValetURL:", self.getLastKnownVKUrl() );
+            }
           }
-          else{
-            console.log("visitVKIssue","no match in str", "parse:", str);
-            lastValetURL =  JSON.parse(str);
-            console.log("visitVKIssue", "LAST UPLOADED ValetURL:", self.getLastKnownVKUrl() );
+          else
+          {
+            console.log("visitVKIssue","Non-OK Status code:", response.statusCode, "BODY:", response.body );
+            lastValetURL =  {"valetKeyURL":""};
           }
 
 
