@@ -49,10 +49,10 @@ module.exports.policies = {
 		// feed : ['isNiceToAnimals', 'hasRabbitFood']
 	// }
 
-//EnvelopeController : {
-//
-  //  '*': 'sessionExtAuth'
-  //}
+EnvelopeController : {
+
+    '*': 'sessionExtAuth'
+  }
 
 
 
