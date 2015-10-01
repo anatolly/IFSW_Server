@@ -59,6 +59,7 @@ module.exports =
     //search_conditions.applicationID = sails.config.ifsw.application_name;
 
     if (search_conditions.id) {
+      sails.log.debug("Envelope", "find", "Isolation Conditions:",CommonTools.getIsolationFilterCondition(req) );
       Envelope.findOne().where(search_conditions).where(CommonTools.getIsolationFilterCondition(req)).exec(function (err, envelope) {
 
         if(err) {

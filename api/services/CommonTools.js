@@ -76,7 +76,7 @@ module.exports = {
     var condition = {};
 
     condition.userID = (request.session.user)? request.session.user:sails.config.ifsw.default_param_userid;
-    request.applicationID = (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
+    condition.applicationID = (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
 
     return condition;
 
