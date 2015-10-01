@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
-    <title>DICOM Upload Form</title>
+  <meta charset="UTF-8">
+  <title>Cloud Storage Upload Form</title>
 </head>
 <body>
+<!--
 <h1>  DICOM FILE UPLOAD FORM</h1>
 <h3> Local path</h3>
 <form action="/v1.0/DICOMEnvelope/upload" enctype="multipart/form-data" method="post">
@@ -16,8 +17,9 @@
 </form>
 
 <br>
+-->
 
-<h1> GENERIC FILE UPLOAD FORM</h1>
+<h1> Local Path UPLOAD FORM</h1>
 <h3> Local path</h3>
 <form action="/v1.0/Envelope/upload" enctype="multipart/form-data" method="post">
   <input type="text" name="title">
@@ -29,11 +31,11 @@
 
 <br>
 
-<h3> Remote  path</h3>
-<form action="/cloudStorage/v1.0/DICOMEnvelope/upload" enctype="multipart/form-data" method="post">
+<h3> Remote  Path UPLOAD FORM</h3>
+<form action="/cloudStorage/v1.0/Envelope/upload" enctype="multipart/form-data" method="post">
   <input type="text" name="title">
   <br>
-  <input type="file" name="dicom_file" multiple="multiple">
+  <input type="file" name="new_content" multiple="multiple">
   <br>
   <input type="submit" value="Upload">
 </form>

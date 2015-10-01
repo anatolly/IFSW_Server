@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+
+  <title>Cloud Storage Sign In Form</title>
+</head>
+
+<h1> Local Path  Signin Form</h1>
+
+<form action="/v1.0/session/signin"  method="post">
+  Login: <input type="text" name="appuser">
+  <br>
+  Password: <input type="text" name="password">
+  <br>
+  <input type="submit" value="SignIn">
+</form>
+<br>
+<a href="/v1.0/session/signoff">  Local Path SinOff</a>
+<br>
+
+<h1> Remote  path Signin Form</h1>
+
+<form action="/cloudStorage//v1.0/session/signin"  method="post">
+  Login: <input type="text" name="appuser">
+  <br>
+  Password: <input type="text" name="password">
+  <br>
+  <input type="submit" value="SignIn">
+</form>
+<br>
+<a href="cloudStorage/v1.0/session/signoff">  Remote Path SinOff</a>
+<br>
+
+
+</body>
+</html>
