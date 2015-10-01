@@ -58,12 +58,14 @@ module.exports.routes = {
   'get /v1.0/session/signoff': 'SessionController.signout',
 
 
+  'post /v1.0/envelope/upload': 'EnvelopeController.upload',
   'get /v1.0/envelope/download': 'EnvelopeController.download',
   'get /v1.0/envelope/delete': 'EnvelopeController.delete',
   'get /v1.0/envelope/find': 'EnvelopeController.find',
   'get /v1.0/envelope/:id?': 'EnvelopeController.find',
   'get /v1.0/envelope/:id/valet': 'ValetKeyController.generateValet',
   'post /v1.0/envelope/:id/valet': 'ValetKeyController.generateValet',
+
 
 
   'get /v1.0/valetkey/:token': 'ValetKeyController.uploadObjectByValet',
