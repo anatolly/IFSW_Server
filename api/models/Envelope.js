@@ -25,8 +25,20 @@ module.exports =
     // MIME type detected
     MimeType: 'string',
 
+    // MIME Type claimed by the client
+    claimedMimeType:'string',
+
+    // client filename of the object
+    filename:{type:'string', defaultsTo: 'uknown', required: true},
+
+      // counted size of the object
+    size:'integer',
+
+    // the size claimed by the client
+    claimedSize:'integer',
+
     // Is mime-dependent deep semantics of the object extracted ?
-    isSemanticsExtracted: { type: "boolean", defaultsTo: false},
+    isSemanticsExtracted: { type: "boolean", defaultsTo: false, required: true },
 
 
     //Authorization and Application-dependent data

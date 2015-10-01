@@ -25,6 +25,12 @@ module.exports =
     // assume the user is authenticated here
     req.session.user = req.param(sails.config.ifsw.req_param_userid);
     req.session.authenticated = true;
+
+    // check presence of application
+    if(req.param(sails.config.ifsw.req_param_applicationid)) {
+      req.session.application = req.param(sails.config.ifsw.req_param_applicationid);
+    }
+
     return res.ok();
   }
   else {
@@ -33,6 +39,7 @@ module.exports =
 } else {return res.forbidden()}
   },
 
+  //----------------------------------------------------------------------------------------------------------------
   signout: function (req, res) {
 
     var user = req.session.user;
@@ -45,18 +52,6 @@ module.exports =
       return res.ok();
     }
   }
-
-  /*
-   find: function (req, res) {
-   DICOMEnvelope.find(req.params.all(), function (err, envelopes) {
-
-   return res.json({
-   envelopes: JSON.stringify(envelopes)
-   });
-
-   });
-   },
-   */
 
 //====================================== INTERNAL UTILITY FUNCTIONS ================================
 

@@ -11,7 +11,7 @@
 
 module.exports.http = {
 
-  key: 'INTRAFAB.CloudStorage.Sails.sid'
+  key: 'INTRAFAB.CloudStorage.Sails.sid',
 
 
 
@@ -25,7 +25,7 @@ module.exports.http = {
   *                                                                           *
   ****************************************************************************/
 
-  // middleware: {
+   middleware: {
 
   /***************************************************************************
   *                                                                          *
@@ -34,30 +34,63 @@ module.exports.http = {
   *                                                                          *
   ***************************************************************************/
 
-    // order: [
-    //   'startRequestTimer',
-    //   'cookieParser',
-    //   'session',
-    //   'myRequestLogger',
-    //   'bodyParser',
-    //   'handleBodyParserError',
-    //   'compress',
-    //   'methodOverride',
-    //   'poweredBy',
-    //   '$custom',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    //   '404',
-    //   '500'
-    // ],
 
-  /****************************************************************************
-  *                                                                           *
-  * Example custom middleware; logs each request to the console.              *
-  *                                                                           *
-  ****************************************************************************/
 
+     order: [
+
+       'startRequestTimer',
+       'cookieParser',
+       'session',
+ //      'myRequestLogger',
+       'bodyParser',
+       'handleBodyParserError',
+       'compress',
+
+       'methodOverride',
+//       'poweredBy',
+       'disablePoweredBy',
+       '$custom',
+//       'setUserIDApplicationID',
+       'router',
+       'www',
+       'favicon',
+       '404',
+       '500'
+     ],
+
+    /****************************************************************************
+     *                                                                           *
+     * IFSW middleware which removes contents of X-powered-By: header            *
+     *                                                                           *
+     ****************************************************************************/
+  disablePoweredBy: function(request, response, next) {
+    var expressApp = sails.hooks.http.app;
+   // expressApp.disable('X-Powered-By');
+   response.set('X-Powered-By', '');
+    next();
+  }
+
+    /****************************************************************************
+     *                                                                           *
+     * IFSW middleware which adds to request userID and applicationName            *
+     *                                                                           *
+     ****************************************************************************/
+    // setUserIDApplicationID: function(request, response, next) {
+    // force using extra conditions
+    // request.headers['X-userID'] = (request.session.user )?request.session.user:sails.config.ifsw.default_param_userid;
+    // request.headers['X-applicationID']= (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
+    // sails.log.debug("MIDDLEWARE","setUser..","applicationID:",sails.config.ifsw.default_param_applicationid);
+    // next();
+    // }
+
+
+
+
+    /****************************************************************************
+     *                                                                           *
+     * Example custom middleware; logs each request to the console.              *
+     *                                                                           *
+     ****************************************************************************/
     // myRequestLogger: function (req, res, next) {
     //     console.log("Requested :: ", req.method, req.url);
     //     return next();
@@ -75,7 +108,7 @@ module.exports.http = {
 
     // bodyParser: require('skipper')
 
-  // },
+   }
 
   /***************************************************************************
   *                                                                          *

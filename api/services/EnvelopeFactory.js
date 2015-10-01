@@ -8,7 +8,7 @@ require('./DICOMFactoryDictionary');
 module.exports = {
 
 
-  createEnvelope: function(objectID, userID) {
+  createEnvelope: function(objectID, userID, applicationID) {
 
 
     aEnvelope = {};
@@ -17,10 +17,15 @@ module.exports = {
      // use unique ID
 
 
-    //setup aapplication ID and user ID for the Envelope
-    aEnvelope.applicationID =  sails.config.ifsw.application_name;
+    //setup application ID and user ID for the Envelope
+    if ( ! applicationID ) { applicationID = sails.config.ifsw.default_param_applicationid; }
+    aEnvelope.applicationID = applicationID;
+
+
     if ( ! userID ) { userID = sails.config.ifsw.default_param_userid; }
     aEnvelope.userID = userID;
+
+
     aEnvelope.isSemanticsExtracted = false;
 
     return aEnvelope;

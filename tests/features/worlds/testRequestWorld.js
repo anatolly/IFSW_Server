@@ -8,6 +8,7 @@ var fs = require('fs');
 var auth_cookie = "";
 
 var last_message = null;
+var lastValetURL = null;
 
 module.exports = function () {
 
@@ -39,6 +40,10 @@ module.exports = function () {
       return id;
     }
 
+    //------------------------------------------------------------------
+    this.getLastKnownVKUrl = function (){
+      return lastValetURL["valetKeyURL"];
+    }
 
 //------------------------------- INTERNAL STATE VALUES ------------- end
 
@@ -63,10 +68,59 @@ module.exports = function () {
     };
 
 
+//-----------------------------------------------------------------------------------------------
+    this.visitVKIssue = function(request_path,cb) {
+
+      var uri = this.SERVER_URL + request_path;
+
+      console.log("visitVKIssue","URI:",uri);
+
+      request.get({url: uri, headers: {'User-Agent': 'request', 'cookie':auth_cookie }},
+        function (error, response) {
+          if (error) {
+            console.log("visitVKIssue", "Error:", error);
+            return cb.fail(new Error('Error on GET request to ' + request_path + ': ' + error.message));
+          }
+          self.lastResponse = response;
+          if (response.headers['set-cookie']) {
+            auth_cookie = response.headers['set-cookie'];
+          }
+
+          console.log("visitVKUssue", "BODY IS:", response.body);
+          console.log("visitVKUssue", "STATUS:", response.statusCode);
+
+
+          if(response.statusCode == 200)
+          {
+            var str = response.body;
+            var v_str = str.match(/\"valetKeyURL\"\: \".+\"/g);
+
+            if (v_str) {
+              lastValetURL =  JSON.parse('{'+ v_str + '}');
+              console.log("visitVKIssue", "LAST UPLOADED ValetURL:", self.getLastKnownVKUrl() );
+            }
+            else{
+              console.log("visitVKIssue","no match in str", "parse:", str);
+              lastValetURL =  JSON.parse(str);
+              console.log("visitVKIssue", "LAST UPLOADED ValetURL:", self.getLastKnownVKUrl() );
+            }
+          }
+          else
+          {
+            console.log("visitVKIssue","Non-OK Status code:", response.statusCode, "BODY:", response.body );
+            lastValetURL =  {"valetKeyURL":""};
+          }
+
+
+          cb()
+        });
+    }
+
+//-----------------------------------------------------------------------------------------------
     this.upload = function(request_path, filename, cb) {
 
       var formData = {
-        dicom_file: {value: fs.createReadStream(filename), options: {filename:"DICOM FILE"}}
+        new_content: {value: fs.createReadStream(filename), options: {filename:"DICOM FILE"}}
       };
 
       var uri = this.SERVER_URL + request_path;
@@ -77,13 +131,13 @@ module.exports = function () {
           ': ' + error.message))
         }
         self.lastResponse = response;
-        console.log("BODY IS:"+ response.body);
+        console.log("Upload", "BODY IS:", response.body);
 
         var str = response.body;
         var id_str = str.match(/\"id\"\: \d+/g);
         if (id_str) {
           lastMessage =  JSON.parse('{'+ id_str + '}');
-          console.log("LAST UPLOADED ID:" + self.getLastUploadedId() );
+          console.log("upload", "LAST UPLOADED ID:", self.getLastUploadedId() );
         }
 
 
@@ -94,23 +148,53 @@ module.exports = function () {
 
 
     };
+    //--------------------------------------------------------------------------------------------------------------------
+
+     this.delete = function(request_path, envelopeid, cb) {
+
+     var uri = this.SERVER_URL + request_path;
+
+     console.log("URL USED:" + uri +'/'+ envelopeid);
+
+     request.get({url:uri +'/'+ envelopeid, headers: {'User-Agent': 'request', 'cookie':auth_cookie }},  function (error, response)  {
+     console.log("delete", "response code:",response.statusCode) // 200
+     console.log("delete", "response headers:", response.headers)
+     self.lastResponse = response;
+     cb();
+     });
+
+     };
 
 
+//-----------------------------------------------------------------------------------
     this.download = function(request_path, param_val, localfilename, cb) {
 
       var uri = this.SERVER_URL + request_path;
 
-      console.log("URL USED:" + uri +'?id='+param_val);
+      console.log("download", "URL USED:", uri +'?id='+param_val);
 
       request.get({url:uri +'?id='+param_val, headers: {'User-Agent': 'request', 'cookie':auth_cookie }}).on('response', function(response) {
         console.log(response.statusCode) // 200
         console.log(response.headers['content-type']) // 'image/png'
         self.lastResponse = response;
-        cb();
-      }).pipe(fs.createWriteStream(localfilename));
+
+      }).pipe(fs.createWriteStream(localfilename)).on('finish', function(response){cb();});
 
     };
+//-----------------------------------------------------------------------------------
+    this.downloadByFullURI = function(uri, localfilename, cb) {
 
+
+      console.log("downloadBtFullURI", "URL USED:", uri );
+
+      request.get({url:uri, headers: {'User-Agent': 'request', 'cookie':auth_cookie }}).on('response', function(response) {
+        console.log(response.statusCode) // 200
+        console.log(response.headers['content-type']) // 'image/png'
+        self.lastResponse = response;
+
+      }).pipe(fs.createWriteStream(localfilename)).on('finish', function(response){cb();});
+
+    };
 
 
 

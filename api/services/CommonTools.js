@@ -22,7 +22,7 @@ module.exports = {
     var uuid = s.join("");
     return uuid;
   },
-
+//-----------------------------------------------------------------------------------------------------------------
   simpleObjectClone: function(obj) {
     var result = {};
     Object.keys(obj).forEach(function(key){
@@ -31,8 +31,8 @@ module.exports = {
     });
     return result;
   },
-
-  //1. клонированирует req.params, чтобы с этим списком можно было работать (удалять что-то, добавлять)
+//-----------------------------------------------------------------------------------------------------------------
+  //1. клонированирует req.params, req.body и req.query, чтобы с этим списком можно было работать (удалять что-то, добавлять)
   //   (!) это можно и так сделать var params = req.params.all(), но заодно уж это в плюсы функции запишем
   //   Код вместо этой функции:
   //   var params = req.params.all();
@@ -42,6 +42,10 @@ module.exports = {
   //   Тогда req.params.all() = { name: '2013-04-28_5501.jpg', id: undefined }. Это не позволяет напрямую params.all() использовать как Model.find(req.params.all()...) т.к. вернется пусто
   //3. type - для определения какие параметры брать, значения 'all' или что-угодно типа 'url only'
   //   req - это стандартный http.IncommingMessage
+  //   See - req.params.all() gives you the collection of parameters culled from (in order of precedence):
+  //   the route (e.g. the id in /post/:id). the request body. the query string
+
+
   cloneSailsReqParams: function(req, type) {
     var params = {};
 
@@ -64,6 +68,19 @@ module.exports = {
 
     return params;
   },
+//----------------------------------------------------------------------------------------------------------------
+// builds a conditions object to isolate users and applications
+// the result of that function in used in model find* methos
+
+  getIsolationFilterCondition: function (request) {
+    var condition = {};
+
+    condition.userID = (request.session.user)? request.session.user:sails.config.ifsw.default_param_userid;
+    request.applicationID = (request.session.application)?request.session.application:sails.config.ifsw.default_param_applicationid;
+
+    return condition;
+
+  }
 
 };
 

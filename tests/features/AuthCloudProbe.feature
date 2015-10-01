@@ -1,9 +1,9 @@
 # for the cucumber tests
-# run cucumber-js -tar @auth
+# run cucumber-js -t @auth
 
 
 
-@auth
+@--auth
 Feature: file_processing_with_authentication_check
 
 

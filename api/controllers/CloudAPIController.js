@@ -51,6 +51,10 @@ module.exports = {
 //-----------------------------------------------------------------------------------------------------------------
   test: function  (req, res) {
 
+    sails.log.debug("CLoudAPIContainer", "test", "STORAGE LOGIN",STORAGE_PROVIDER_LOGIN);
+    sails.log.debug("CLoudAPIContainer", "test", "STORAGE URL",STORAGE_PROVIDER_URL);
+
+
     var client = CloudAPI.initClient(STORAGE_PROVIDER_LOGIN, STORAGE_PROVIDER_KEY,STORAGE_PROVIDER_URL );
     client.getContainers(function (err, containers) {
         if (err) {
