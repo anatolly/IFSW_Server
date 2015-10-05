@@ -24,10 +24,10 @@ module.exports = function () {
 
 // CHANGE SERVER_URL regarding the location of tested server
 // LOCAL
-      this.SERVER_URL = "http://localhost:1337";
+   //   this.SERVER_URL = "http://localhost:1337";
 
 // SINGAPORE
-//    this.SERVER_URL = "http://localhost:8080/cloudStorage";
+ this.SERVER_URL = "http://172.16.0.96:8080/cloudStorage-1";
 
 
 
@@ -187,13 +187,30 @@ module.exports = function () {
 
       console.log("downloadBtFullURI", "URL USED:", uri );
 
-      request.get({url:uri, headers: {'User-Agent': 'request', 'cookie':auth_cookie }}).on('response', function(response) {
-        console.log(response.statusCode) // 200
-        console.log(response.headers['content-type']) // 'image/png'
-        self.lastResponse = response;
+      try {
 
-      }).pipe(fs.createWriteStream(localfilename)).on('finish', function(response){cb();});
 
+        request.get({
+          url: uri,
+          headers: {'User-Agent': 'request', 'cookie': auth_cookie}}).on("error", function(err){console.log("ERROR in request get", "Reason:", err);
+          return cb.fail(new Error('Error in GET request to ' + uri +
+          ': ' + err.message))
+                }).on('response', function (response) {
+          console.log(response.statusCode) // 200
+          console.log(response.headers['content-type']) // 'image/png'
+          self.lastResponse = response;
+
+        }).pipe(fs.createWriteStream(localfilename)).on('finish', function (response) {
+          cb();
+        }).on("error", function(err){console.log("ERROR in request get", "Exception:", e);});
+
+      }
+      catch (e)
+      {
+        console.log("ERROR in request get", "Exception:", e);
+        return cb.fail(new Error('Error on GET request to ' + uri +
+        ': ' + e))
+      }
     };
 
 
