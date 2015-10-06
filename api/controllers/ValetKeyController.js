@@ -13,7 +13,7 @@
 
   const DEFAULT_PATHNAME = "/valetkey/";
 
-   const REVERSE_PROXY_URI_HEADER_NAME = "X-IFSW-Orig-Uri";
+   const REVERSE_PROXY_URI_HEADER_NAME = "x-ifsw-orig-uri";
 
 
 //---------------- CONSTANTS DEFINITIONS -----------------------------------------------------------------  end  -----
