@@ -195,14 +195,21 @@ function getURLFor(request, valetKey) {
 
   var url = "";
   var path = "";
+  var proto_host = "";
 
-  if ( (request.headers.REVERSE_PROXY_URI_HEADER_NAME  === undefined ) || (equest.headers.REVERSE_PROXY_URI_HEADER_NAME  === null))
+
+  sails.log.debug("getURLFor","headers:", request.headers);
+
+
+  if ( (request.headers[REVERSE_PROXY_URI_HEADER_NAME ]  === undefined ))// || (equest.headers.REVERSE_PROXY_URI_HEADER_NAME  === null))
   {
     path = request.originalUrl;
+    proto_host = "http://" + request.get('host');
   }
   else
   {
-    path = request.headers.REVERSE_PROXY_URI_HEADER_NAME;
+    path = request.headers[REVERSE_PROXY_URI_HEADER_NAME];
+    proto_host = request.headers['origin'];
   }
 
 
@@ -216,7 +223,7 @@ function getURLFor(request, valetKey) {
   if (index >= 0) {
     var subpath = path.substring(0, index);
 
-    var url = "http://" + request.get('host') + subpath + DEFAULT_PATHNAME + valetKey.token;
+    var url = proto_host + subpath + DEFAULT_PATHNAME + valetKey.token;
 
   }
   else { url = "ERROR in VALET URL";}
