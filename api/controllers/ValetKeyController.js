@@ -13,6 +13,9 @@
 
   const DEFAULT_PATHNAME = "/valetkey/";
 
+   const REVERSE_PROXY_URI_HEADER_NAME = "X-IFSW-Orig-Uri";
+
+
 //---------------- CONSTANTS DEFINITIONS -----------------------------------------------------------------  end  -----
 
 
@@ -191,8 +194,18 @@ module.exports =
 function getURLFor(request, valetKey) {
 
   var url = "";
+  var path = "";
 
-  var path = request.originalUrl;
+  if ( (request.headers.REVERSE_PROXY_URI_HEADER_NAME  === undefined ) || (equest.headers.REVERSE_PROXY_URI_HEADER_NAME  === null))
+  {
+    path = request.originalUrl;
+  }
+  else
+  {
+    path = request.headers.REVERSE_PROXY_URI_HEADER_NAME;
+  }
+
+
 
   sails.log.debug("getURLFor","path:", path);
 
