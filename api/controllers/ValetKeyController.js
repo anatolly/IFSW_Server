@@ -11,7 +11,7 @@
 
 //---------------- CONSTANTS DEFINITIONS ----------------------------------------------------------------- begin -----
 
-  const DEFAULT_PATHNAME = "/v1.0"+"/valetkey";
+  const DEFAULT_PATHNAME = "/valetkey/";
 
 //---------------- CONSTANTS DEFINITIONS -----------------------------------------------------------------  end  -----
 
@@ -190,7 +190,25 @@ module.exports =
 
 function getURLFor(request, valetKey) {
 
-  var url = "http://" + request.get('host') + DEFAULT_PATHNAME + "/" + valetKey.token;
+  var url = "";
+
+  var path = request.originalUrl;
+
+  sails.log.debug("getURLFor","path:", path);
+
+  var search_pattern = /\/envelope\/\w+\/valet/i;
+
+  var index = path.search(search_pattern);
+
+  if (index >= 0) {
+    var subpath = path.substring(0, index);
+
+    var url = "http://" + request.get('host') + subpath + DEFAULT_PATHNAME + valetKey.token;
+
+  }
+  else { url = "ERROR in VALET URL";}
+
+
   return url;
 }
 //--------------------------------------------------------------------------------------------------------------------
