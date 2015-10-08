@@ -12,8 +12,10 @@
 //---------------- CONSTANTS DEFINITIONS ----------------------------------------------------------------- begin -----
 
   const DEFAULT_PATHNAME = "/valetkey/";
+  const DEFAULT_PROTOCOL = "http://";
+  const DEFAULT_PORT = ":8080";
 
-   const REVERSE_PROXY_URI_HEADER_NAME = "x-ifsw-orig-uri";
+  const REVERSE_PROXY_URI_HEADER_NAME = "x-ifsw-orig-uri";
 
 
 //---------------- CONSTANTS DEFINITIONS -----------------------------------------------------------------  end  -----
@@ -204,12 +206,19 @@ function getURLFor(request, valetKey) {
   if ( (request.headers[REVERSE_PROXY_URI_HEADER_NAME ]  === undefined ))// || (equest.headers.REVERSE_PROXY_URI_HEADER_NAME  === null))
   {
     path = request.originalUrl;
-    proto_host = "http://" + request.get('host');
+    proto_host = DEFAULT_PROTOCOL + request.get('host');
   }
   else
   {
     path = request.headers[REVERSE_PROXY_URI_HEADER_NAME];
-    proto_host = request.headers['origin'];
+
+    if(request.headers['origin'] === undefined ) {
+    proto_host =  DEFAULT_PROTOCOL + request.get('host') + DEFAULT_PORT;
+  }
+    else {
+    proto_host =  DEFAULT_PROTOCOL + request.headers['origin'];
+  }
+
   }
 
 
