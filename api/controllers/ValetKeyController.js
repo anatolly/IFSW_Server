@@ -211,14 +211,7 @@ function getURLFor(request, valetKey) {
   else
   {
     path = request.headers[REVERSE_PROXY_URI_HEADER_NAME];
-
-    if(request.headers['origin'] === undefined ) {
-    proto_host =  DEFAULT_PROTOCOL + request.get('host') + DEFAULT_PORT;
-  }
-    else {
-    proto_host =  DEFAULT_PROTOCOL + request.headers['origin'];
-  }
-
+    proto_host =  DEFAULT_PROTOCOL + request.get('host');
   }
 
 
