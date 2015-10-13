@@ -27,7 +27,8 @@
     "request": "^2.53.0",
     "sails": "~0.10.5",
     "sails-disk": "^0.10.7",
-    "sails-mysql": "^0.10.11"
+    "sails-mysql": "^0.10.11",
+    "waterline":"~0.10.18"
   },
   "scripts": {
     "start": "node app.js",
