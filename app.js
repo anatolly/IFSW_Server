@@ -29,6 +29,7 @@ process.chdir(__dirname);
 
 
 /* for nodetime statistics */
+/*
 ntc = require('./config/nodetimec');
 
 
@@ -37,7 +38,7 @@ require('nodetime').profile({
   appName: ntc.nodetimeAuth.appName
 });
 
-
+*/
 
 
 
